@@ -12,6 +12,7 @@ import javax.swing.text.StyledEditorKit;
 import javax.swing.text.View;
 import javax.swing.text.ViewFactory;
 
+/**TODO doc*/
 public class LineWrapEditorKit extends StyledEditorKit {
 
     private boolean wrap = false;

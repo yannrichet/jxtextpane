@@ -37,7 +37,8 @@ import sun.swing.UIAction;
 
 
 /**
- *
+ * Lacking class in swingX. Inspired from JTextPane implementation (in Swing) rlateed to JEditorPane.
+ * Add Undo/Redo and search features.
  * @author richet
  */
 public class JXTextPane extends JXEditorPane {

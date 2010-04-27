@@ -12,22 +12,16 @@ import javax.swing.text.Document;
 import javax.swing.text.EditorKit;
 import javax.swing.text.JTextComponent;
 
+/** Component integrating scrollpane and left line numbers. Appears like a JXTextPane for easy replacement of former JXTextPane
+@author richet
+ */
 public class LineNumbersTextPane extends JXTextPane {
 
-    public boolean displayLineNumbers = true;
+    private boolean displayLineNumbers = true;
     JSplitPane jSplitPane1;
     JScrollPane jScrollPane1;
     LineNumbersSidePane linenumbers;
 
-    /**
-     * Sets the currently installed kit for handling
-     * content.  This is the bound property that
-     * establishes the content type of the editor.
-     *
-     * @param kit the desired editor behavior
-     * @exception IllegalArgumentException if kit is not a
-     *		<code>WrapEditorKit</code>
-     */
     @Override
     public final void setEditorKit(EditorKit kit) {
         if (kit instanceof LineWrapEditorKit) {
@@ -89,7 +83,7 @@ public class LineNumbersTextPane extends JXTextPane {
     }
 
     public void updateLineNumberDivider() {
-        if (!displayLineNumbers) {
+        if (!isDisplayLineNumbers()) {
             return;
         }
         //System.err.println("updateLineNumberDivider");
@@ -97,7 +91,7 @@ public class LineNumbersTextPane extends JXTextPane {
     }
 
     public void updateLineNumberView() {
-        if (!displayLineNumbers) {
+        if (!isDisplayLineNumbers()) {
             return;
         }
         linenumbers.repaint();
@@ -106,6 +100,23 @@ public class LineNumbersTextPane extends JXTextPane {
 
     public Container getContainerWithLines() {
         return jSplitPane1;
+    }
+
+    /**
+     * @return the displayLineNumbers
+     */
+    public boolean isDisplayLineNumbers() {
+        return displayLineNumbers;
+    }
+
+    /**
+     * @param displayLineNumbers the displayLineNumbers to set
+     */
+    public void setDisplayLineNumbers(boolean displayLineNumbers) {
+        this.displayLineNumbers = displayLineNumbers;
+        if (!displayLineNumbers) {
+            jSplitPane1.setDividerLocation(0);
+        }
     }
 
     class LineNumbersSidePane extends JPanel {
@@ -121,7 +132,7 @@ public class LineNumbersTextPane extends JXTextPane {
             //System.err.println("JLineNumberPane.paint");
             super.paint(g);
 
-            if (!displayLineNumbers) {
+            if (!isDisplayLineNumbers()) {
                 return;
             }
             // We need to properly convert the points to match the viewport

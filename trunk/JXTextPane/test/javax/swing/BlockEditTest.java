@@ -9,6 +9,7 @@ import java.io.FileReader;
 import java.util.HashMap;
 import javax.swing.text.AbstractDocument;
 import javax.swing.text.BadLocationException;
+import javax.swing.text.DocumentFilter;
 import javax.swing.text.EditorKit;
 
 /**
@@ -52,8 +53,11 @@ public class BlockEditTest {
             }
         });
 
-        //((AbstractDocument) edit.getDocument()).setDocumentFilter(new SyntaxColorizer(edit.getStyledDocument(), syntax));
-        ((AbstractDocument) edit.getDocument()).setDocumentFilter(new BlockModeHandler(edit));
+        DocumentFilterChain df = new DocumentFilterChain(new BlockModeHandler(edit),new SyntaxColorizer(edit.getStyledDocument(), syntax));
+                ((AbstractDocument) edit.getDocument()).setDocumentFilter(df);
+
+                //((AbstractDocument) edit.getDocument()).setDocumentFilter(new SyntaxColorizer(edit.getStyledDocument(), syntax));
+        //((AbstractDocument) edit.getDocument()).setDocumentFilter(new BlockModeHandler(edit));
 
 
         JFrame frame = new JFrame("Syntax Highlighting");
