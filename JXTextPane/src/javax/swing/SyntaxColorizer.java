@@ -5,6 +5,7 @@ import java.util.*;
 import javax.swing.event.UndoableEditListener;
 import javax.swing.text.*;
 
+/**TODO doc, regexp test, ctrl-space for completion, advanced strucuture completion (?)*/
 class SyntaxColorizer extends DocumentFilter {
 
     private StyledDocument doc;

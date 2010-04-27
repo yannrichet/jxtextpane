@@ -6,8 +6,8 @@ import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import javax.swing.text.*;
 
-/**
- *
+/**TODO font monospaced only
+ * DocumentFilter to support block mode selection. Selection highlighting is overloaded with custom one.
  */
 public class BlockModeHandler extends DocumentFilter {
 
@@ -153,7 +153,7 @@ public class BlockModeHandler extends DocumentFilter {
     }
 
     /**
-     * @param BlockMode the BlockMode to set
+     * @param BlockMode true for block mode selection, false for original multiline selection.
      */
     public void setBlockMode(boolean BlockMode) {
         this.blockMode = BlockMode;

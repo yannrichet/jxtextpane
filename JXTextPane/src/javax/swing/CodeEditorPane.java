@@ -1,12 +1,7 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-
 package javax.swing;
 
 /**
- *
+ *TODO all, set/get for properies
  * @author richet
  */
 public class CodeEditorPane extends LineNumbersTextPane {
