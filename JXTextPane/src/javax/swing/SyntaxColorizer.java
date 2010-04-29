@@ -5,17 +5,19 @@ import java.util.*;
 import javax.swing.event.UndoableEditListener;
 import javax.swing.text.*;
 
-/**TODO doc, regexp test, ctrl-space for completion, advanced strucuture completion (?)*/
+/**This calls supports syntax dependant colorization. RegExp are available if RegExpHashMap is used to give KeyWords,
+ * TODO ctrl-space for completion, advanced strucuture completion (if ... else ...?)
+ * TODO: HTML export of content of this component*/
 class SyntaxColorizer extends DocumentFilter {
 
     private StyledDocument doc;
     private Element rootElement;
     private boolean multiLineComment;
     private MutableAttributeSet normal;
-    private HashMap<Color, MutableAttributeSet> keyword;
     private MutableAttributeSet comment;
     private MutableAttributeSet quote;
     private HashMap<String, Color> keywords;
+    private HashMap<Color, MutableAttributeSet> colors;
     UndoableEditListener undo;
 
     public void setUndoableEditListener(UndoableEditListener undo) {
@@ -38,21 +40,79 @@ class SyntaxColorizer extends DocumentFilter {
         quote = new SimpleAttributeSet();
         StyleConstants.setForeground(quote, Color.red);
 
-        keyword = new HashMap<Color, MutableAttributeSet>();
+        setKeywordColor(keywords);
+    }
 
+//TODO setKeywordBackgroundColor, setKeywordItalic, setKeywordBold, setKeywordUnderline
+    public void setKeywordColor(HashMap<String, Color> keywords) {
+        colors = new HashMap<Color, MutableAttributeSet>();
         this.keywords = keywords;
+        if (keywords instanceof RegExpHashMap) {
+            ((RegExpHashMap) keywords).keyAsRegexp = false;
+        }
+
         for (String k : keywords.keySet()) {
-            if (!keyword.containsKey(keywords.get(k))) {
+            if (!colors.containsKey(keywords.get(k))) {
                 MutableAttributeSet kw = new SimpleAttributeSet();
                 StyleConstants.setForeground(kw, keywords.get(k));
-                keyword.put(keywords.get(k), kw);
+                colors.put(keywords.get(k), kw);
             }
+        }
+
+        if (keywords instanceof RegExpHashMap) {
+            ((RegExpHashMap) keywords).keyAsRegexp = true;
         }
     }
 
+    public static class RegExpHashMap extends HashMap {
+
+        public boolean keyAsRegexp = true;
+
+        @Override
+        public boolean containsKey(Object o) {
+            if (keyAsRegexp) {
+                for (Object regexp_key : super.keySet()) {
+                    if (o.toString().matches(regexp_key.toString())) {
+                        return true;
+                    }
+                }
+                return false;
+            } else {
+                for (Object regexp_key : super.keySet()) {
+                    if (o.toString().equals(regexp_key.toString())) {
+                        Object found = super.get(regexp_key.toString());
+                        return true;
+                    }
+                }
+                return false;
+            }
+        }
+
+        @Override
+        public Object get(Object o) {
+            if (keyAsRegexp) {
+                for (Object regexp_key : super.keySet()) {
+                    if (o.toString().matches(regexp_key.toString())) {
+                        Object found = super.get(regexp_key.toString());
+                        return found;
+                    }
+                }
+                return null;
+            } else {
+                for (Object regexp_key : super.keySet()) {
+                    if (o.toString().equals(regexp_key.toString())) {
+                        Object found = super.get(regexp_key.toString());
+                        return found;
+                    }
+                }
+                return null;
+            }
+        }
+    }
     /*
      *  Override to apply syntax highlighting after the document has been updated
      */
+
     @Override
     public void insertString(DocumentFilter.FilterBypass b, int offset, String str, AttributeSet a) throws BadLocationException {
         if (str.equals("{")) {
@@ -377,7 +437,7 @@ class SyntaxColorizer extends DocumentFilter {
         String token = content.substring(startOffset, endOfToken);
 
         if (isKeyword(token)) {
-            doc.setCharacterAttributes(startOffset, endOfToken - startOffset, keyword.get(keywords.get(token)), false);
+            doc.setCharacterAttributes(startOffset, endOfToken - startOffset, colors.get(keywords.get(token)), false);
         }
 
         return endOfToken + 1;
