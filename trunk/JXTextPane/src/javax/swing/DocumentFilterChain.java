@@ -8,7 +8,8 @@ import javax.swing.text.DocumentFilter;
 
 /**
  * Class intended to allow multiple DocumentFilter in one Document.
- * TODO not properly working
+ * Be carefull with order of document filters chain. May be not reversible.
+ * For instance BlockModeHandler should be declred as last argument of DocumentFilterChain
  * @author richet
  */
 public class DocumentFilterChain extends DocumentFilter {
@@ -52,50 +53,57 @@ public class DocumentFilterChain extends DocumentFilter {
     }
 
     public void updateRussianDoll(FilterBypass root) {
-        doll[0] = new FilterBypassContainer(root, chain.get(0));
+        doll[0].setBypass(root);
     }
 
-    public void buildRussianDoll() {
+    void buildRussianDoll() {
         doll = new FilterBypassContainer[chain.size()];
-        doll[0] = null;
+        doll[0] = new FilterBypassContainer(null, chain.get(0));
         for (int j = 1; j < chain.size(); j++) {
             doll[j] = new FilterBypassContainer(doll[j - 1], chain.get(j));
         }
     }
 
     FilterBypass getFilterBypass() {
-        return doll[chain.size() - 1];
+        return doll[doll.length - 1];
     }
 
     class FilterBypassContainer extends FilterBypass {
 
-        FilterBypass parent;
-        DocumentFilter node;
+        private FilterBypass parent_bypass;
+        DocumentFilter current_filter;
 
-        public FilterBypassContainer(FilterBypass parent, DocumentFilter node) {
-            this.parent = parent;
-            this.node = node;
+        public FilterBypassContainer(FilterBypass bypass, DocumentFilter node) {
+            this.parent_bypass = bypass;
+            this.current_filter = node;
 
         }
 
         @Override
         public Document getDocument() {
-            return parent.getDocument();
+            return parent_bypass.getDocument();
         }
 
         @Override
         public void remove(int i, int i1) throws BadLocationException {
-            node.remove(parent, i, i1);
+            current_filter.remove(parent_bypass, i, i1);
         }
 
         @Override
         public void insertString(int i, String string, AttributeSet as) throws BadLocationException {
-            node.insertString(parent, i, string, as);
+            current_filter.insertString(parent_bypass, i, string, as);
         }
 
         @Override
         public void replace(int i, int i1, String string, AttributeSet as) throws BadLocationException {
-            node.replace(parent, i, i1, string, as);
+            current_filter.replace(parent_bypass, i, i1, string, as);
+        }
+
+        /**
+         * @param parent_bypass the parent_bypass to set
+         */
+        public void setBypass(FilterBypass parent_bypass) {
+            this.parent_bypass = parent_bypass;
         }
     }
 }

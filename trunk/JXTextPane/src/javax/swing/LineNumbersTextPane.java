@@ -12,8 +12,8 @@ import javax.swing.text.Document;
 import javax.swing.text.EditorKit;
 import javax.swing.text.JTextComponent;
 
-/** Component integrating scrollpane and left line numbers. Appears like a JXTextPane for easy replacement of former JXTextPane
-@author richet
+/** Component integrating scrollpane and left-side line numbers. Appears like a JXTextPane for easy replacement of former JXTextPane
+@author richet (heavily inspired by many searches on the web)
  */
 public class LineNumbersTextPane extends JXTextPane {
 
@@ -21,6 +21,10 @@ public class LineNumbersTextPane extends JXTextPane {
     JSplitPane jSplitPane1;
     JScrollPane jScrollPane1;
     LineNumbersSidePane linenumbers;
+
+    public int getNumberOfLines() {
+        return ((LineWrapEditorKit) getEditorKit()).number_of_lines;
+    }
 
     @Override
     public final void setEditorKit(EditorKit kit) {

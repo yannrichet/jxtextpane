@@ -4,12 +4,11 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.BufferedReader;
-import java.io.FileReader;
 import java.util.HashMap;
 import javax.swing.text.AbstractDocument;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.EditorKit;
+import static javax.swing.Common.*;
 
 /**
  *
@@ -60,17 +59,5 @@ public class LineWrapTest {
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setSize(800, 300);
         frame.setVisible(true);
-    }
-
-    public static String read(String file) throws Exception {
-        FileReader fr = new FileReader(file);
-        BufferedReader br = new BufferedReader(fr);
-        StringBuffer sb = new StringBuffer();
-        String s;
-        while ((s = br.readLine()) != null) {
-            sb.append(s + "\n");
-        }
-        fr.close();
-        return sb.toString();
     }
 }

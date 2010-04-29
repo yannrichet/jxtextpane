@@ -1,13 +1,16 @@
 package javax.swing;
 
+import java.awt.Font;
+import java.awt.Graphics;
 import java.awt.Point;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import javax.swing.text.*;
 
-/**TODO font monospaced only
+/**TODO change BlockMode Caret color, copy/paste
  * DocumentFilter to support block mode selection. Selection highlighting is overloaded with custom one.
+ * @author richet (heavily inspired by many searches on the web)
  */
 public class BlockModeHandler extends DocumentFilter {
 
@@ -27,6 +30,9 @@ public class BlockModeHandler extends DocumentFilter {
             return;
         }
         this.component = c;
+
+        component.setFont(Font.getFont(Font.MONOSPACED));
+        
         component.addKeyListener(new KeyAdapter() {
 
             @Override
@@ -45,6 +51,22 @@ public class BlockModeHandler extends DocumentFilter {
                 }
                 component.setSelectionStart(start);
                 component.setSelectionEnd(end);
+
+                if (isBlockMode() && e.isControlDown()) {// To support copy/paste keyboard actions... Maybe a better handling should exists
+                    if (e.getKeyCode() == KeyEvent.VK_C) {
+                        System.out.println("copy");
+                        return; // needed to not avoerload action with super.keyPressed(e);
+                    }
+                    if (e.getKeyCode() == KeyEvent.VK_V) {
+                        System.out.println("paste");
+                        return;// needed to not avoerload action with super.keyPressed(e);
+                    }
+                    if (e.getKeyCode() == KeyEvent.VK_X) {
+                        System.out.println("cut");
+                        return;// needed to not avoerload action with super.keyPressed(e);
+                    }
+                }
+
                 super.keyPressed(e);
             }
         });
@@ -61,7 +83,6 @@ public class BlockModeHandler extends DocumentFilter {
                 int cnt = selections.length;
                 for (int i = cnt - 1; i >= 0; i--) {
                     int start = selections[i].getStartOffset();
-                    int end = selections[i].getEndOffset();
                     b.insertString(start, str, a);
                 }
             } catch (Exception ex) {
@@ -219,6 +240,11 @@ public class BlockModeHandler extends DocumentFilter {
                 }
                 y0++;
             }
+        }
+
+        @Override
+        public void paint(Graphics grphcs) {
+            super.paint(grphcs);
         }
     }
 }

@@ -12,7 +12,8 @@ import javax.swing.text.StyledEditorKit;
 import javax.swing.text.View;
 import javax.swing.text.ViewFactory;
 
-/**TODO doc*/
+/**
+ @author richet (heavily inspired by many searches on the web)*/
 public class LineWrapEditorKit extends StyledEditorKit {
 
     private boolean wrap = false;

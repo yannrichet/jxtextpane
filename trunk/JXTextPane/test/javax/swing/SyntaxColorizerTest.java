@@ -4,11 +4,10 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.BufferedReader;
-import java.io.FileReader;
 import java.util.HashMap;
 import javax.swing.text.AbstractDocument;
 import javax.swing.text.BadLocationException;
+import static javax.swing.Common.*;
 
 /**
  *
@@ -17,8 +16,9 @@ import javax.swing.text.BadLocationException;
 public class SyntaxColorizerTest {
 
     public static void main(String a[]) throws BadLocationException {
-        final HashMap<String, Color> syntax = new HashMap<String, Color>();
-        syntax.put("abstract", Color.BLUE);
+        final HashMap syntax = new SyntaxColorizer.RegExpHashMap();
+        //syntax.put("abstract", Color.BLUE);
+        syntax.put("abs(\\w+)", Color.BLUE);
         syntax.put("boolean", Color.BLUE);
         syntax.put("break", Color.BLUE);
         syntax.put("byte", Color.BLUE);
@@ -77,6 +77,7 @@ public class SyntaxColorizerTest {
         syntax.put("void", Color.GREEN);
         syntax.put("volatile", Color.GREEN);
         syntax.put("while", Color.GREEN);
+        syntax.put("\\$(\\w+)", Color.YELLOW);
 
         final JXTextPane edit = new JXTextPane();
 
@@ -93,7 +94,7 @@ public class SyntaxColorizerTest {
             }
         });
 
-        ((AbstractDocument)edit.getDocument()).setDocumentFilter(new SyntaxColorizer(edit.getStyledDocument(), syntax));
+        ((AbstractDocument) edit.getDocument()).setDocumentFilter(new SyntaxColorizer(edit.getStyledDocument(), syntax));
 
         JFrame frame = new JFrame("Syntax Highlighting");
         frame.getContentPane().add(new JScrollPane(edit));
@@ -101,17 +102,5 @@ public class SyntaxColorizerTest {
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setSize(800, 300);
         frame.setVisible(true);
-    }
-
-    public static String read(String file) throws Exception {
-        FileReader fr = new FileReader(file);
-        BufferedReader br = new BufferedReader(fr);
-        StringBuffer sb = new StringBuffer();
-        String s;
-        while ((s = br.readLine()) != null) {
-            sb.append(s + "\n");
-        }
-        fr.close();
-        return sb.toString();
     }
 }
