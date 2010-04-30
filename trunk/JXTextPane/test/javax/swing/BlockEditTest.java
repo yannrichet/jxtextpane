@@ -54,7 +54,7 @@ public class BlockEditTest {
         //((AbstractDocument) edit.getDocument()).setDocumentFilter(new SyntaxColorizer(edit.getStyledDocument(), syntax));
         ((AbstractDocument) edit.getDocument()).setDocumentFilter(new BlockModeHandler(edit));
 
-        JFrame frame = new JFrame("Syntax Highlighting");
+        JFrame frame = new JFrame("Block mode edition");
         frame.getContentPane().add(new JScrollPane(edit));
         frame.getContentPane().add(button, BorderLayout.SOUTH);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);

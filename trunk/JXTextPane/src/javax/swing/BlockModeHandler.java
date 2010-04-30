@@ -3,16 +3,25 @@ package javax.swing;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Point;
+import java.awt.Rectangle;
+import java.awt.Toolkit;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.ClipboardOwner;
+import java.awt.datatransfer.DataFlavor;
+import java.awt.datatransfer.StringSelection;
+import java.awt.datatransfer.Transferable;
+import java.awt.datatransfer.UnsupportedFlavorException;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
+import java.io.IOException;
 import javax.swing.text.*;
 
 /**TODO change BlockMode Caret color, copy/paste
  * DocumentFilter to support block mode selection. Selection highlighting is overloaded with custom one.
  * @author richet (heavily inspired by many searches on the web)
  */
-public class BlockModeHandler extends DocumentFilter {
+public class BlockModeHandler extends DocumentFilter implements ClipboardOwner {
 
     private boolean blockMode = false;
     JTextComponent component;
@@ -32,7 +41,7 @@ public class BlockModeHandler extends DocumentFilter {
         this.component = c;
 
         component.setFont(Font.getFont(Font.MONOSPACED));
-        
+
         component.addKeyListener(new KeyAdapter() {
 
             @Override
@@ -40,6 +49,7 @@ public class BlockModeHandler extends DocumentFilter {
                 if (e.isAltDown()) {
                     setBlockMode(!isBlockMode());
                 }
+
                 component.getCaret().setSelectionVisible(false);
                 int start = component.getSelectionStart();
                 int end = component.getSelectionEnd();
@@ -55,14 +65,18 @@ public class BlockModeHandler extends DocumentFilter {
                 if (isBlockMode() && e.isControlDown()) {// To support copy/paste keyboard actions... Maybe a better handling should exists
                     if (e.getKeyCode() == KeyEvent.VK_C) {
                         System.out.println("copy");
+                        setClipboardContents(getSelectedBlock());
                         return; // needed to not avoerload action with super.keyPressed(e);
                     }
                     if (e.getKeyCode() == KeyEvent.VK_V) {
                         System.out.println("paste");
+                        pasteAsBlock(getClipboardContents());
                         return;// needed to not avoerload action with super.keyPressed(e);
                     }
                     if (e.getKeyCode() == KeyEvent.VK_X) {
                         System.out.println("cut");
+                        setClipboardContents(getSelectedBlock());
+                        clearSelectedBlock();
                         return;// needed to not avoerload action with super.keyPressed(e);
                     }
                 }
@@ -70,6 +84,108 @@ public class BlockModeHandler extends DocumentFilter {
                 super.keyPressed(e);
             }
         });
+    }
+
+    /**
+     * Place a String on the clipboard, and make this class the
+     * owner of the Clipboard's contents.
+     */
+    void setClipboardContents(String aString) {
+        StringSelection stringSelection = new StringSelection(aString);
+        Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+        clipboard.setContents(stringSelection, this);
+    }
+
+    /**
+     * Get the String residing on the clipboard.
+     *
+     * @return any text found on the Clipboard; if none found, return an
+     * empty String.
+     */
+    String getClipboardContents() {
+        String result = "";
+        Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+        //odd: the Object param of getContents is not currently used
+        Transferable contents = clipboard.getContents(this);
+        boolean hasTransferableText = (contents != null) && contents.isDataFlavorSupported(DataFlavor.stringFlavor);
+        if (hasTransferableText) {
+            try {
+                result = (String) contents.getTransferData(DataFlavor.stringFlavor);
+            } catch (UnsupportedFlavorException ex) {
+                //highly unlikely since we are using a standard DataFlavor
+                //System.err.println(ex);
+                ex.printStackTrace();
+            } catch (IOException ex) {
+                //System.err.println(ex);
+                ex.printStackTrace();
+            }
+        }
+        return result;
+    }
+
+    public void lostOwnership(Clipboard clpbrd, Transferable t) {
+        System.err.println("lostOwnership");
+    }
+
+    public String getSelectedBlock() {
+        if (component == null) {
+            return null;
+        }
+        Highlighter.Highlight[] selections = component.getHighlighter().getHighlights();
+        if (isBlockMode() && (selections != null && selections.length > 0)) {
+            StringBuilder sb = new StringBuilder();
+            try {
+                int cnt = selections.length;
+                for (int i = 0; i < cnt; i++) {
+                    int start = selections[i].getStartOffset();
+                    int end = selections[i].getEndOffset();
+                    sb.append(component.getText(start, end - start));
+                    sb.append('\n');
+                }
+                return sb.toString();
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        }
+        return null;
+    }
+
+    public void clearSelectedBlock() {
+        if (component == null) {
+            return;
+        }
+        Highlighter.Highlight[] selections = component.getHighlighter().getHighlights();
+        if (isBlockMode() && (selections != null && selections.length > 0)) {
+            try {
+                int cnt = selections.length;
+                for (int i = cnt - 1; i >= 0; i--) {
+                    int start = selections[i].getStartOffset();
+                    int end = selections[i].getEndOffset();
+                    component.getDocument().remove(start, end - start);
+                }
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        }
+    }
+
+    public void pasteAsBlock(String s) {//TODO choose strategy and implement
+        if (component == null) {
+            return;
+        }
+        Highlighter.Highlight[] selections = component.getHighlighter().getHighlights();
+        if (isBlockMode() && (selections != null && selections.length > 0)) {
+            try {
+                int cnt = selections.length;
+                for (int i = cnt - 1; i >= 0; i--) {
+                    int start = selections[i].getStartOffset();
+                    int end = selections[i].getEndOffset();
+                    component.getDocument().insertString(start, s, null);
+                }
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        }
     }
 
     @Override
@@ -185,6 +301,49 @@ public class BlockModeHandler extends DocumentFilter {
         Point lastPoint = new Point(0, 0);
 
         @Override
+        public void paint(Graphics g) {
+            JTextComponent comp = getComponent();
+            if (comp == null) {
+                return;
+            }
+
+            int dot = getDot();
+            Rectangle r = null;
+            char dotChar;
+            try {
+                r = comp.modelToView(dot);
+                if (r == null) {
+                    return;
+                }
+                dotChar = comp.getText(dot, 1).charAt(0);
+            } catch (BadLocationException e) {
+                return;
+            }
+
+            if ((x != r.x) || (y != r.y)) {
+                // paint() has been called directly, without a previous call to
+                // damage(), so do some cleanup. (This happens, for example, when the
+                // text component is resized.)
+                repaint(); // erase previous location of caret
+                x = r.x;   // Update dimensions (width gets set later in this method)
+                y = r.y;
+                height = r.height;
+            }
+
+            g.setColor(comp.getCaretColor());
+            g.setXORMode(comp.getBackground()); // do this to draw in XOR mode
+
+
+            width = g.getFontMetrics().charWidth(dotChar);
+            if (isVisible()) {
+                g.drawLine(r.x, r.y, r.x, r.y - r.height);
+                g.drawLine(r.x - width, r.y - r.height / 2, r.x + width, r.y - r.height / 2);
+
+                //fillRect(r.x, r.y, width, r.height);
+            }
+        }
+
+        @Override
         public void mouseMoved(MouseEvent e) {
             super.mouseMoved(e);
             lastPoint = new Point(e.getX(), e.getY());
@@ -240,11 +399,6 @@ public class BlockModeHandler extends DocumentFilter {
                 }
                 y0++;
             }
-        }
-
-        @Override
-        public void paint(Graphics grphcs) {
-            super.paint(grphcs);
         }
     }
 }
