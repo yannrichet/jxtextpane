@@ -1,9 +1,12 @@
 package javax.swing;
 
+import java.awt.Color;
 import java.awt.Font;
+import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Point;
 import java.awt.Rectangle;
+import java.awt.Shape;
 import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.ClipboardOwner;
@@ -16,6 +19,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.io.IOException;
 import javax.swing.text.*;
+import javax.swing.text.LayeredHighlighter.LayerPainter;
 
 /**TODO change BlockMode Caret color, copy/paste
  * DocumentFilter to support block mode selection. Selection highlighting is overloaded with custom one.
@@ -31,7 +35,7 @@ public class BlockModeHandler extends DocumentFilter implements ClipboardOwner {
     public BlockModeHandler(JTextComponent component) {
         setTextComponent(component);
         normal = component.getCaret();
-        block = new BlockModeCaret();
+        block = new BlockModeCaret(Color.RED);
     }
 
     void setTextComponent(JTextComponent c) {
@@ -299,6 +303,13 @@ public class BlockModeHandler extends DocumentFilter implements ClipboardOwner {
     public class BlockModeCaret extends DefaultCaret {
 
         Point lastPoint = new Point(0, 0);
+        LayeredHighlighter.LayerPainter painter;
+        Color color;
+
+        public BlockModeCaret(Color c) {
+            color = c;
+            this.painter = new BlockHighlightPainter(c);
+        }
 
         @Override
         public void paint(Graphics g) {
@@ -330,14 +341,15 @@ public class BlockModeHandler extends DocumentFilter implements ClipboardOwner {
                 height = r.height;
             }
 
-            g.setColor(comp.getCaretColor());
+            g.setColor(color);//comp.getCaretColor());
             g.setXORMode(comp.getBackground()); // do this to draw in XOR mode
 
 
             width = g.getFontMetrics().charWidth(dotChar);
             if (isVisible()) {
-                g.drawLine(r.x, r.y, r.x, r.y - r.height);
-                g.drawLine(r.x - width, r.y - r.height / 2, r.x + width, r.y - r.height / 2);
+                g.drawLine(r.x, r.y, r.x, r.y + r.height);
+                g.drawLine(r.x + 1, r.y, r.x + 1, r.y + r.height);
+                //g.drawLine(r.x - width, r.y - r.height / 2, r.x + width, r.y - r.height / 2);
 
                 //fillRect(r.x, r.y, width, r.height);
             }
@@ -380,7 +392,7 @@ public class BlockModeHandler extends DocumentFilter implements ClipboardOwner {
             int pos1 = getComponent().getUI().viewToModel(getComponent(), new Point(firstX, y0));
             int pos2 = getComponent().getUI().viewToModel(getComponent(), new Point(lastX, y0));
             try {
-                getComponent().getHighlighter().addHighlight(pos1, pos2, DefaultHighlighter.DefaultPainter);
+                getComponent().getHighlighter().addHighlight(pos1, pos2, painter);
             } catch (Exception ex) {
                 ex.printStackTrace();
             }
@@ -392,7 +404,7 @@ public class BlockModeHandler extends DocumentFilter implements ClipboardOwner {
                     pos1 = pos1new;
                     pos2 = pos2new;
                     try {
-                        getComponent().getHighlighter().addHighlight(pos1, pos2, DefaultHighlighter.DefaultPainter);
+                        getComponent().getHighlighter().addHighlight(pos1, pos2, painter);
                     } catch (Exception ex) {
                         ex.printStackTrace();
                     }
@@ -400,5 +412,46 @@ public class BlockModeHandler extends DocumentFilter implements ClipboardOwner {
                 y0++;
             }
         }
+    }
+
+    // Painter for underlined highlights
+    public class BlockHighlightPainter extends LayeredHighlighter.LayerPainter {
+
+        public BlockHighlightPainter(Color c) {
+            color = c;
+        }
+
+        public void paint(Graphics g, int offs0, int offs1, Shape bounds, JTextComponent c) {
+            // Do nothing: this method will never be called
+        }
+
+        public Shape paintLayer(Graphics g, int offs0, int offs1, Shape bounds, JTextComponent c, View view) {
+            g.setColor(color == null ? c.getSelectionColor() : color);
+
+            Rectangle alloc = null;
+            if (offs0 == view.getStartOffset() && offs1 == view.getEndOffset()) {
+                if (bounds instanceof Rectangle) {
+                    alloc = (Rectangle) bounds;
+                } else {
+                    alloc = bounds.getBounds();
+                }
+            } else {
+                try {
+                    Shape shape = view.modelToView(offs0, Position.Bias.Forward, offs1, Position.Bias.Backward, bounds);
+                    alloc = (shape instanceof Rectangle) ? (Rectangle) shape : shape.getBounds();
+                } catch (BadLocationException e) {
+                    return null;
+                }
+            }
+
+            FontMetrics fm = c.getFontMetrics(c.getFont());
+            int baseline = alloc.y + alloc.height - fm.getDescent() + 1;
+            g.drawRect(alloc.x, baseline - fm.getHeight(), alloc.width - 1, fm.getHeight());
+            g.drawRect(alloc.x - 1, baseline + 1 - fm.getHeight(), alloc.width - 1, fm.getHeight());
+            //g.drawLine(alloc.x, baseline + 1, alloc.x + alloc.width,                    baseline + 1);
+
+            return alloc;
+        }
+        protected Color color; // The color for the underline
     }
 }
