@@ -320,38 +320,29 @@ public class BlockModeHandler extends DocumentFilter implements ClipboardOwner {
 
             int dot = getDot();
             Rectangle r = null;
-            char dotChar;
             try {
                 r = comp.modelToView(dot);
-                if (r == null) {
-                    return;
-                }
-                dotChar = comp.getText(dot, 1).charAt(0);
             } catch (BadLocationException e) {
+                return;
+            }
+            if (r == null) {
                 return;
             }
 
             if ((x != r.x) || (y != r.y)) {
-                // paint() has been called directly, without a previous call to
-                // damage(), so do some cleanup. (This happens, for example, when the
-                // text component is resized.)
                 repaint(); // erase previous location of caret
-                x = r.x;   // Update dimensions (width gets set later in this method)
+                x = r.x; // set new values for x,y,width,height
                 y = r.y;
-                height = r.height;
+                width = 8;
+                height = 8;
             }
 
-            g.setColor(color);//comp.getCaretColor());
-            g.setXORMode(comp.getBackground()); // do this to draw in XOR mode
-
-
-            width = g.getFontMetrics().charWidth(dotChar);
             if (isVisible()) {
-                g.drawLine(r.x, r.y, r.x, r.y + r.height);
-                g.drawLine(r.x + 1, r.y, r.x + 1, r.y + r.height);
-                //g.drawLine(r.x - width, r.y - r.height / 2, r.x + width, r.y - r.height / 2);
-
-                //fillRect(r.x, r.y, width, r.height);
+                g.setColor(color);
+                g.drawLine(r.x, r.y, r.x, r.y + 7);
+                g.drawLine(r.x, r.y, r.x + 7, r.y);
+                g.drawLine(r.x + 1, r.y, r.x + 1, r.y + 7);
+                g.drawLine(r.x, r.y + 1, r.x + 7, r.y + 1);
             }
         }
 
