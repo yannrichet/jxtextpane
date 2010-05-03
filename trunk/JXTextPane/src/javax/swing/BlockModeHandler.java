@@ -18,6 +18,8 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.text.*;
 import javax.swing.text.LayeredHighlighter.LayerPainter;
 
@@ -95,7 +97,8 @@ public class BlockModeHandler extends DocumentFilter implements ClipboardOwner {
      * owner of the Clipboard's contents.
      */
     void setClipboardContents(String aString) {
-        StringSelection stringSelection = new StringSelection(aString);
+        System.err.println("setClipboardContents");
+        Transferable stringSelection = new StringSelection(aString);
         Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
         clipboard.setContents(stringSelection, this);
     }
@@ -107,23 +110,31 @@ public class BlockModeHandler extends DocumentFilter implements ClipboardOwner {
      * empty String.
      */
     String getClipboardContents() {
+        System.err.println("getClipboardContents");
         String result = "";
         Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
         //odd: the Object param of getContents is not currently used
         Transferable contents = clipboard.getContents(this);
-        boolean hasTransferableText = (contents != null) && contents.isDataFlavorSupported(DataFlavor.stringFlavor);
-        if (hasTransferableText) {
-            try {
-                result = (String) contents.getTransferData(DataFlavor.stringFlavor);
-            } catch (UnsupportedFlavorException ex) {
-                //highly unlikely since we are using a standard DataFlavor
-                //System.err.println(ex);
-                ex.printStackTrace();
-            } catch (IOException ex) {
-                //System.err.println(ex);
-                ex.printStackTrace();
-            }
+        try {
+            System.err.println(contents.getTransferData(DataFlavor.stringFlavor));
+        } catch (UnsupportedFlavorException ex) {
+            ex.printStackTrace();
+        } catch (IOException ex) {
+            ex.printStackTrace();
         }
+        //    boolean hasTransferableText = (contents != null) && contents.isDataFlavorSupported(DataFlavor.stringFlavor);
+        // if (hasTransferableText) {
+        try {
+            result = (String) contents.getTransferData(DataFlavor.stringFlavor);
+        } catch (UnsupportedFlavorException ex) {
+            //highly unlikely since we are using a standard DataFlavor
+            //System.err.println(ex);
+            ex.printStackTrace();
+        } catch (IOException ex) {
+            //System.err.println(ex);
+            ex.printStackTrace();
+        }
+        //  }
         return result;
     }
 
@@ -427,20 +438,16 @@ public class BlockModeHandler extends DocumentFilter implements ClipboardOwner {
                     alloc = bounds.getBounds();
                 }
             } else {
+                System.err.println(offs0 +" "+view.getStartOffset() +" "+offs1 +" "+view.getEndOffset());
                 try {
                     Shape shape = view.modelToView(offs0, Position.Bias.Forward, offs1, Position.Bias.Backward, bounds);
                     alloc = (shape instanceof Rectangle) ? (Rectangle) shape : shape.getBounds();
                 } catch (BadLocationException e) {
+                    System.err.println("!");
                     return null;
                 }
             }
-
-            FontMetrics fm = c.getFontMetrics(c.getFont());
-            int baseline = alloc.y + alloc.height - fm.getDescent() + 1;
-            g.drawRect(alloc.x, baseline - fm.getHeight(), alloc.width - 1, fm.getHeight());
-            g.drawRect(alloc.x - 1, baseline + 1 - fm.getHeight(), alloc.width - 1, fm.getHeight());
-            //g.drawLine(alloc.x, baseline + 1, alloc.x + alloc.width,                    baseline + 1);
-
+            g.fillRect(alloc.x, alloc.y, alloc.width , alloc.height);
             return alloc;
         }
         protected Color color; // The color for the underline
