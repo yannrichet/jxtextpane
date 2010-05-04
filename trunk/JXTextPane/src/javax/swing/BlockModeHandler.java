@@ -2,7 +2,6 @@ package javax.swing;
 
 import java.awt.Color;
 import java.awt.Font;
-import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Point;
 import java.awt.Rectangle;
@@ -18,10 +17,7 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.swing.text.*;
-import javax.swing.text.LayeredHighlighter.LayerPainter;
 
 /**TODO change BlockMode Caret color, copy/paste
  * DocumentFilter to support block mode selection. Selection highlighting is overloaded with custom one.
@@ -92,6 +88,19 @@ public class BlockModeHandler extends DocumentFilter implements ClipboardOwner {
         });
     }
 
+    /*private void copy()
+    {
+    Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+    TransferHandler transferHandler = jTextComponent.getTransferHandler();
+    transferHandler.exportToClipboard(jTextComponent, clipboard, TransferHandler.COPY);
+    }
+
+    private void paste()
+    {
+    Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+    TransferHandler transferHandler = jTextComponent.getTransferHandler();
+    transferHandler.importData(jTextComponent, clipboard.getContents(null));
+    }*/
     /**
      * Place a String on the clipboard, and make this class the
      * owner of the Clipboard's contents.
@@ -101,6 +110,8 @@ public class BlockModeHandler extends DocumentFilter implements ClipboardOwner {
         Transferable stringSelection = new StringSelection(aString);
         Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
         clipboard.setContents(stringSelection, this);
+        TransferHandler transferHandler = component.getTransferHandler();
+        transferHandler.exportToClipboard(component, clipboard, TransferHandler.COPY);
     }
 
     /**
@@ -114,7 +125,9 @@ public class BlockModeHandler extends DocumentFilter implements ClipboardOwner {
         String result = "";
         Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
         //odd: the Object param of getContents is not currently used
+        TransferHandler transferHandler = component.getTransferHandler();
         Transferable contents = clipboard.getContents(this);
+        transferHandler.importData(component, contents);
         try {
             System.err.println(contents.getTransferData(DataFlavor.stringFlavor));
         } catch (UnsupportedFlavorException ex) {
@@ -269,7 +282,7 @@ public class BlockModeHandler extends DocumentFilter implements ClipboardOwner {
     }
 
     private void super_replace(DocumentFilter.FilterBypass b, int offset, int length, String text,
-            AttributeSet attrs) throws BadLocationException {
+                               AttributeSet attrs) throws BadLocationException {
         if (component == null) {
             return;
         }
@@ -438,7 +451,7 @@ public class BlockModeHandler extends DocumentFilter implements ClipboardOwner {
                     alloc = bounds.getBounds();
                 }
             } else {
-                System.err.println(offs0 +" "+view.getStartOffset() +" "+offs1 +" "+view.getEndOffset());
+                System.err.println(offs0 + " " + view.getStartOffset() + " " + offs1 + " " + view.getEndOffset());
                 try {
                     Shape shape = view.modelToView(offs0, Position.Bias.Forward, offs1, Position.Bias.Backward, bounds);
                     alloc = (shape instanceof Rectangle) ? (Rectangle) shape : shape.getBounds();
@@ -447,7 +460,7 @@ public class BlockModeHandler extends DocumentFilter implements ClipboardOwner {
                     return null;
                 }
             }
-            g.fillRect(alloc.x, alloc.y, alloc.width , alloc.height);
+            g.fillRect(alloc.x, alloc.y, alloc.width, alloc.height);
             return alloc;
         }
         protected Color color; // The color for the underline
