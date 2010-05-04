@@ -13,6 +13,8 @@ import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.StringSelection;
 import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
@@ -110,6 +112,7 @@ public class BlockModeHandler extends DocumentFilter implements ClipboardOwner {
         Transferable stringSelection = new StringSelection(aString);
         Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
         clipboard.setContents(stringSelection, this);
+
         TransferHandler transferHandler = component.getTransferHandler();
         transferHandler.exportToClipboard(component, clipboard, TransferHandler.COPY);
     }
@@ -121,34 +124,21 @@ public class BlockModeHandler extends DocumentFilter implements ClipboardOwner {
      * empty String.
      */
     String getClipboardContents() {
-        System.err.println("getClipboardContents");
-        String result = "";
+        System.err.println("getClipboardContents\n=====================");
         Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
         //odd: the Object param of getContents is not currently used
-        TransferHandler transferHandler = component.getTransferHandler();
         Transferable contents = clipboard.getContents(this);
-        transferHandler.importData(component, contents);
+        String data = "";
         try {
-            System.err.println(contents.getTransferData(DataFlavor.stringFlavor));
+            data = (String) contents.getTransferData(DataFlavor.stringFlavor);
+            System.err.println(data + "\n=====================");
         } catch (UnsupportedFlavorException ex) {
             ex.printStackTrace();
         } catch (IOException ex) {
             ex.printStackTrace();
         }
-        //    boolean hasTransferableText = (contents != null) && contents.isDataFlavorSupported(DataFlavor.stringFlavor);
-        // if (hasTransferableText) {
-        try {
-            result = (String) contents.getTransferData(DataFlavor.stringFlavor);
-        } catch (UnsupportedFlavorException ex) {
-            //highly unlikely since we are using a standard DataFlavor
-            //System.err.println(ex);
-            ex.printStackTrace();
-        } catch (IOException ex) {
-            //System.err.println(ex);
-            ex.printStackTrace();
-        }
-        //  }
-        return result;
+
+        return data;
     }
 
     public void lostOwnership(Clipboard clpbrd, Transferable t) {
@@ -198,20 +188,30 @@ public class BlockModeHandler extends DocumentFilter implements ClipboardOwner {
     }
 
     public void pasteAsBlock(String s) {//TODO choose strategy and implement
+        System.err.println("pasteAsBlock:\n" + s);
         if (component == null) {
             return;
         }
-        Highlighter.Highlight[] selections = component.getHighlighter().getHighlights();
-        if (isBlockMode() && (selections != null && selections.length > 0)) {
-            try {
-                int cnt = selections.length;
-                for (int i = cnt - 1; i >= 0; i--) {
-                    int start = selections[i].getStartOffset();
-                    int end = selections[i].getEndOffset();
-                    component.getDocument().insertString(start, s, null);
+        if (isBlockMode()) {
+            Highlighter.Highlight[] selections = component.getHighlighter().getHighlights();
+            if (selections != null && selections.length > 0) {
+                String[] lines = s.split("\n");
+                try {
+                    int cnt = selections.length;
+                    for (int i = cnt - 1; i >= 0; i--) {
+                        int start = selections[i].getStartOffset();
+                        int end = selections[i].getEndOffset();
+                        component.getDocument().insertString(start, lines[i % lines.length], null);
+                    }
+                } catch (Exception ex) {
+                    ex.printStackTrace();
                 }
-            } catch (Exception ex) {
-                ex.printStackTrace();
+            } else {
+                try {
+                    component.getDocument().insertString(component.getCaretPosition(), s, null);
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
             }
         }
     }
@@ -282,7 +282,7 @@ public class BlockModeHandler extends DocumentFilter implements ClipboardOwner {
     }
 
     private void super_replace(DocumentFilter.FilterBypass b, int offset, int length, String text,
-                               AttributeSet attrs) throws BadLocationException {
+            AttributeSet attrs) throws BadLocationException {
         if (component == null) {
             return;
         }
@@ -451,12 +451,12 @@ public class BlockModeHandler extends DocumentFilter implements ClipboardOwner {
                     alloc = bounds.getBounds();
                 }
             } else {
-                System.err.println(offs0 + " " + view.getStartOffset() + " " + offs1 + " " + view.getEndOffset());
+                //System.err.println(offs0 + " " + view.getStartOffset() + " " + offs1 + " " + view.getEndOffset());
                 try {
                     Shape shape = view.modelToView(offs0, Position.Bias.Forward, offs1, Position.Bias.Backward, bounds);
                     alloc = (shape instanceof Rectangle) ? (Rectangle) shape : shape.getBounds();
                 } catch (BadLocationException e) {
-                    System.err.println("!");
+                    //System.err.println("!");
                     return null;
                 }
             }

@@ -39,6 +39,7 @@ import org.jdesktop.swingx.action.ActionManager;
 /**
  * Lacking class in swingX. Inspired from JTextPane implementation (in Swing) rlateed to JEditorPane.
  * Add Undo/Redo and search features.
+ * TODO add ctrl+mouse wheel for font size control
  * @author richet (heavily inspired by swingX code)
  */
 public class JXTextPane extends JXEditorPane {

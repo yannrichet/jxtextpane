@@ -7,7 +7,6 @@ package javax.swing;
 public class LineNumbersTextPaneTest {
 
     public static void main(String[] args) {
-        //TODO not displaying lines
         JFrame f = new JFrame("LineNumbersTextPane");
         LineNumbersTextPane te = new LineNumbersTextPane();
         te.setText("AAA\nAAAA\nBBBB 0.5\nCCCC 0.5 0.4\n* AAAA\nAAA\nAAAA\nBBBB 0.5\nCCCC 0.5 0.4\n* AAAA\nAAA\nAAAA\nBBBB 0.5\nCCCC 0.5 0.4\n* AAAA\nAAA\nAAAA\nBBBB 0.5\nCCCC 0.5 0.4\n* AAAA\nAAA\nAAAA\nBBBB 0.5\nCCCC 0.5 0.4\n* AAAA\nAAA\nAAAA\nBBBB 0.5\nCCCC 0.5 0.4\n* AAAA\nAAA\nAAAA\nBBBB 0.5\nCCCC 0.5 0.4\n* AAAA\nAAA\nAAAA\nBBBB 0.5\nCCCC 0.5 0.4\n* AAAA\nAAA\nAAAA\nBBBB 0.5\nCCCC 0.5 0.4\n* AAAA\nAAA\nAAAA\nBBBB 0.5\nCCCC 0.5 0.4\n* AAAA\nAAA\nAAAA\nBBBB 0.5\nCCCC 0.5 0.4\n* AAAA\nAAA\nAAAA\nBBBB 0.5\nCCCC 0.5 0.4\n* AAAA\nAAA\nAAAA\nBBBB 0.5\nCCCC 0.5 0.4\n* AAAA\nAAA\nAAAA\nBBBB 0.5\nCCCC 0.5 0.4\n* AAAA\nAAA\nAAAA\nBBBB 0.5\nCCCC 0.5 0.4\n* AAAA\nAAA\nAAAA\nBBBB 0.5\nCCCC 0.5 0.4\n* AAAA\nAAA\nAAAA\nBBBB 0.5\nCCCC 0.5 0.4\n* AAAA\nAAA\nAAAA\nBBBB 0.5\nCCCC 0.5 0.4\n* AAAA\nAAA\nAAAA\nBBBB 0.5\nCCCC 0.5 0.4\n* AAAA\nAAA\nAAAA\nBBBB 0.5\nCCCC 0.5 0.4\n* AAAA\n");
