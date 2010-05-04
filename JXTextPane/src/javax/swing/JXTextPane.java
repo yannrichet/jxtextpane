@@ -31,8 +31,8 @@ import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
 import javax.swing.undo.UndoManager;
 import org.jdesktop.swingx.JXEditorPane;
+import org.jdesktop.swingx.UIAction;
 import org.jdesktop.swingx.action.ActionManager;
-import sun.swing.UIAction;
 
 
 
