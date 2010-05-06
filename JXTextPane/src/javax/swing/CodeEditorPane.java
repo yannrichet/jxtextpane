@@ -1,6 +1,7 @@
 package javax.swing;
 
 import java.awt.Color;
+import java.awt.Font;
 import java.util.HashMap;
 import javax.swing.text.AbstractDocument;
 import javax.swing.text.EditorKit;
@@ -10,6 +11,14 @@ import javax.swing.text.EditorKit;
  * @author richet
  */
 public class CodeEditorPane extends LineNumbersTextPane {
+
+    boolean init = false;
+
+    public CodeEditorPane() {
+        super();
+        super.setFont(Font.getFont(Font.MONOSPACED));
+        init = true;
+    }
 
     public void setKeywordColor(HashMap<String, Color> keywords) {
         if (keywords == null) {
@@ -22,6 +31,17 @@ public class CodeEditorPane extends LineNumbersTextPane {
     @Override
     protected EditorKit createDefaultEditorKit() {
         return new LineWrapEditorKit();
+    }
 
+    @Override
+    public void setFont(Font font) {
+        if (font == null || font.getFamily() == null) {
+            return;
+        }
+        if (init && !font.getFamily().equals(Font.MONOSPACED)) {
+            throw new IllegalArgumentException("Only " + Font.MONOSPACED + " is authorized in such component.");
+        } else {
+            super.setFont(font);
+        }
     }
 }
