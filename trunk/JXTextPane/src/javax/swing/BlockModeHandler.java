@@ -18,7 +18,10 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
+import java.beans.PropertyChangeListener;
 import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.text.*;
 
 /**TODO change BlockMode Caret color, copy/paste
@@ -30,7 +33,7 @@ public class BlockModeHandler extends DocumentFilter implements ClipboardOwner {
     private boolean blockMode = false;
     JTextComponent component;
     Caret normal;
-    Caret block;
+    BlockModeCaret block;
 
     public BlockModeHandler(JTextComponent component) {
         setTextComponent(component);
@@ -46,48 +49,176 @@ public class BlockModeHandler extends DocumentFilter implements ClipboardOwner {
 
         component.setFont(Font.getFont(Font.MONOSPACED));
 
+        resetCut();
+        resetPaste();
+        resetCopy();
+
         component.addKeyListener(new KeyAdapter() {
 
             @Override
             public void keyPressed(KeyEvent e) {
                 if (e.isAltDown()) {
                     setBlockMode(!isBlockMode());
-                }
-
-                component.getCaret().setSelectionVisible(false);
-                int start = component.getSelectionStart();
-                int end = component.getSelectionEnd();
-                if (isBlockMode()) {
-                    component.setCaret(block);
-                } else {
-                    component.getHighlighter().removeAllHighlights();
-                    component.setCaret(normal);
-                }
-                component.setSelectionStart(start);
-                component.setSelectionEnd(end);
-
-                if (isBlockMode() && e.isControlDown()) {// To support copy/paste keyboard actions... Maybe a better handling should exists
-                    if (e.getKeyCode() == KeyEvent.VK_C) {
-                        System.out.println("copy");
-                        setClipboardContents(getSelectedBlock());
-                        return; // needed to not avoerload action with super.keyPressed(e);
+                    if (isBlockMode()) {
+                        component.getCaret().setSelectionVisible(false);
+                        try {
+                            int pos = component.getCaretPosition();
+                            int start = component.getSelectionStart();
+                            Point startPoint = component.modelToView(start).getLocation();
+                            int end = component.getSelectionEnd();
+                            Point endPoint = component.modelToView(end).getLocation();
+                            endPoint.setLocation(endPoint.x, endPoint.y + 1);
+                            component.setCaret(block);
+                            component.setCaretPosition(pos);
+                            block.customHighlight(startPoint, endPoint);
+                        } catch (BadLocationException ex) {
+                            ex.printStackTrace();
+                        }
+                    } else {
+                        int pos = component.getCaretPosition();
+                        component.setCaret(normal);
+                        component.setCaretPosition(pos);
+                        int start = 0;
+                        int end = 0;
+                        if (component.getHighlighter().getHighlights().length > 0) {
+                            start = component.getHighlighter().getHighlights()[0].getStartOffset();
+                            end = component.getHighlighter().getHighlights()[component.getHighlighter().getHighlights().length - 1].getEndOffset();
+                            component.getHighlighter().removeAllHighlights();
+                        } else {
+                            start = component.getCaretPosition();
+                            end = start;
+                        }
+                        component.setSelectionStart(start);
+                        component.setSelectionEnd(end);
                     }
-                    if (e.getKeyCode() == KeyEvent.VK_V) {
-                        System.out.println("paste");
-                        pasteAsBlock(getClipboardContents());
-                        return;// needed to not avoerload action with super.keyPressed(e);
-                    }
-                    if (e.getKeyCode() == KeyEvent.VK_X) {
-                        System.out.println("cut");
-                        setClipboardContents(getSelectedBlock());
-                        clearSelectedBlock();
-                        return;// needed to not avoerload action with super.keyPressed(e);
-                    }
                 }
-
                 super.keyPressed(e);
             }
         });
+    }
+
+    void resetCopy() {
+        final Action copy = component.getActionMap().get("copy");
+        Action newcopy = new Action() {
+
+            public Object getValue(String key) {
+                return copy.getValue(key);
+            }
+
+            public void putValue(String key, Object value) {
+                copy.putValue(key, value);
+            }
+
+            public void setEnabled(boolean b) {
+                copy.setEnabled(b);
+            }
+
+            public boolean isEnabled() {
+                return copy.isEnabled();
+            }
+
+            public void addPropertyChangeListener(PropertyChangeListener listener) {
+                copy.addPropertyChangeListener(listener);
+            }
+
+            public void removePropertyChangeListener(PropertyChangeListener listener) {
+                copy.removePropertyChangeListener(listener);
+            }
+
+            public void actionPerformed(ActionEvent e) {
+                System.err.println("COPY !");
+                if (isBlockMode()) {
+                    setClipboardContents(getSelectedBlock());
+                } else {
+                    copy.actionPerformed(e);
+                }
+                resetCopy();
+            }
+        };
+        component.getActionMap().put("copy", newcopy);
+    }
+
+    void resetPaste() {
+        final Action paste = component.getActionMap().get("paste");
+        Action newpaste = new Action() {
+
+            public Object getValue(String key) {
+                return paste.getValue(key);
+            }
+
+            public void putValue(String key, Object value) {
+                paste.putValue(key, value);
+            }
+
+            public void setEnabled(boolean b) {
+                paste.setEnabled(b);
+            }
+
+            public boolean isEnabled() {
+                return paste.isEnabled();
+            }
+
+            public void addPropertyChangeListener(PropertyChangeListener listener) {
+                paste.addPropertyChangeListener(listener);
+            }
+
+            public void removePropertyChangeListener(PropertyChangeListener listener) {
+                paste.removePropertyChangeListener(listener);
+            }
+
+            public void actionPerformed(ActionEvent e) {
+                System.err.println("PASTE !");
+                if (isBlockMode()) {
+                    pasteAsBlock(getClipboardContents());
+                } else {
+                    paste.actionPerformed(e);
+                }
+                resetPaste();
+            }
+        };
+        component.getActionMap().put("paste", newpaste);
+    }
+
+    void resetCut() {
+        final Action cut = component.getActionMap().get("cut");
+        Action newcut = new Action() {
+
+            public Object getValue(String key) {
+                return cut.getValue(key);
+            }
+
+            public void putValue(String key, Object value) {
+                cut.putValue(key, value);
+            }
+
+            public void setEnabled(boolean b) {
+                cut.setEnabled(b);
+            }
+
+            public boolean isEnabled() {
+                return cut.isEnabled();
+            }
+
+            public void addPropertyChangeListener(PropertyChangeListener listener) {
+                cut.addPropertyChangeListener(listener);
+            }
+
+            public void removePropertyChangeListener(PropertyChangeListener listener) {
+                cut.removePropertyChangeListener(listener);
+            }
+
+            public void actionPerformed(ActionEvent e) {
+                System.err.println("CUT !");
+                if (isBlockMode()) {
+                    setClipboardContents(getSelectedBlock());
+                    clearSelectedBlock();
+                } else {
+                    cut.actionPerformed(e);
+                }
+                resetCut();
+            }
+        };
+        component.getActionMap().put("cut", newcut);
     }
 
     /*private void copy()
@@ -96,7 +227,7 @@ public class BlockModeHandler extends DocumentFilter implements ClipboardOwner {
     TransferHandler transferHandler = jTextComponent.getTransferHandler();
     transferHandler.exportToClipboard(jTextComponent, clipboard, TransferHandler.COPY);
     }
-
+    
     private void paste()
     {
     Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
@@ -399,7 +530,7 @@ public class BlockModeHandler extends DocumentFilter implements ClipboardOwner {
             }
         }
 
-        protected void customHighlight(Point start, Point end) {
+        public void customHighlight(Point start, Point end) {
             getComponent().getHighlighter().removeAllHighlights();
             int y0 = start.y;
             int firstX = start.x;
