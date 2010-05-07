@@ -8,8 +8,8 @@ import javax.swing.text.DocumentFilter;
 
 /**
  * Class intended to allow multiple DocumentFilter in one Document.
- * Be carefull with order of document filters chain. May be not reversible.
- * For instance BlockModeHandler should be declred as last argument of DocumentFilterChain
+ * Be carefull with order of filters. May be not reversible.
+ * For instance BlockModeHandler should be declared as last argument of DocumentFilterChain
  * @author richet
  */
 public class DocumentFilterChain extends DocumentFilter {
