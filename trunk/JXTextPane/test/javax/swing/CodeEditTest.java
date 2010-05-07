@@ -1,9 +1,8 @@
 package javax.swing;
 
-import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.awt.Font;
+import java.awt.GraphicsEnvironment;
 import java.util.HashMap;
 import javax.swing.SyntaxColorizer.RegExpHashMap;
 import javax.swing.text.BadLocationException;
@@ -33,7 +32,9 @@ public class CodeEditTest {
 
         edit.setText(read("src/javax/swing/JXTextPane.java"));
 
-        JFrame frame = new JFrame("Syntax Highlighting");
+        edit.setVerticalLineAtPos(80);
+        
+        JFrame frame = new JFrame("Code editor");
         frame.getContentPane().add(edit.getContainerWithLines());
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setSize(800, 300);
