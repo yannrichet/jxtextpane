@@ -70,8 +70,9 @@ public class JXTextPane extends JXEditorPane {
         return new StyledEditorKit();
     }
 
+    /** To turn around ugly overloading of paste() in JXEditorPane ... (intended to handle html style, which is not our subject)*/
     @Override
-    public void paste() { // To turn around ugly overloading of paste() in JXEditorPane ... (intended to handle html style, which is not our subject)
+    public void paste() {
         if (isEditable() && isEnabled()) {
             //invokeAction("paste", TransferHandler.getPasteAction());
             ActionMap map = getActionMap();

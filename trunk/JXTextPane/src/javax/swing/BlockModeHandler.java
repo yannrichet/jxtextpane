@@ -366,7 +366,7 @@ public class BlockModeHandler extends DocumentFilter implements ClipboardOwner {
         if (isBlockMode() && (selections != null && selections.length > 0)) {
             try {
                 int cnt = selections.length;
-                for (int i = cnt - 1; i >= 0; i--) {
+                for (int i = 0; i < cnt; i++) {
                     int start = selections[i].getStartOffset();
                     int end = selections[i].getEndOffset();
                     component.getDocument().remove(start, end - start);
@@ -377,24 +377,29 @@ public class BlockModeHandler extends DocumentFilter implements ClipboardOwner {
         }
     }
 
-    public void pasteAsBlock(String s) {//TODO choose strategy and implement
+    public void pasteAsBlock(String s) {
         if (component == null) {
             return;
         }
         if (isBlockMode()) {
             Highlighter.Highlight[] selections = component.getHighlighter().getHighlights();
             if (selections != null && selections.length > 0) {
+                setBlockMode(false);
                 String[] lines = s.split("\n");
                 try {
                     int cnt = selections.length;
-                    for (int i = cnt - 1; i >= 0; i--) {
+                    for (int i = 0; i < cnt; i++) {
                         int start = selections[i].getStartOffset();
                         int end = selections[i].getEndOffset();
+                        if (start != end) {
+                            component.getDocument().remove(start, end - start);
+                        }
                         component.getDocument().insertString(start, lines[i % lines.length], null);
                     }
                 } catch (Exception ex) {
                     ex.printStackTrace();
                 }
+                setBlockMode(true);
             } else {
                 try {
                     component.getDocument().insertString(component.getCaretPosition(), s, null);
@@ -414,7 +419,7 @@ public class BlockModeHandler extends DocumentFilter implements ClipboardOwner {
         if (isBlockMode() && (selections != null && selections.length > 0)) {
             try {
                 int cnt = selections.length;
-                for (int i = cnt - 1; i >= 0; i--) {
+                for (int i = 0; i < cnt; i++) {
                     int start = selections[i].getStartOffset();
                     b.insertString(start, str, a);
                 }
@@ -435,7 +440,7 @@ public class BlockModeHandler extends DocumentFilter implements ClipboardOwner {
         if (isBlockMode() && (selections != null && selections.length > 0)) {
             try {
                 int cnt = selections.length;
-                for (int i = cnt - 1; i >= 0; i--) {
+                for (int i = 0; i < cnt; i++) {
                     int start = selections[i].getStartOffset();
                     int end = selections[i].getEndOffset();
                     b.remove(start, end - start);
@@ -457,7 +462,7 @@ public class BlockModeHandler extends DocumentFilter implements ClipboardOwner {
         if (isBlockMode() && (selections != null && selections.length > 0)) {
             try {
                 int cnt = selections.length;
-                for (int i = cnt - 1; i >= 0; i--) {
+                for (int i = 0; i < cnt; i++) {
                     int start = selections[i].getStartOffset();
                     int end = selections[i].getEndOffset();
                     super_replace(b, start, end - start, text, attrs);
