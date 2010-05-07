@@ -27,7 +27,7 @@ import java.util.HashMap;
 import java.util.StringTokenizer;
 import javax.swing.text.*;
 
-/**TODO impl BlockMode copy/paste
+/**
  * DocumentFilter to support block mode selection. Selection highlighting is overloaded with custom one.
  * @author richet (heavily inspired by many searches on the web)
  */
@@ -38,7 +38,6 @@ public class BlockModeHandler extends DocumentFilter implements ClipboardOwner {
     Caret normal;
     BlockModeCaret block;
     Color block_color = new Color(1.0f, 0.0f, 0.0f, 0.4f);
-
 
     public BlockModeHandler(JTextComponent component) {
         setTextComponent(component);
@@ -154,8 +153,8 @@ public class BlockModeHandler extends DocumentFilter implements ClipboardOwner {
     }
 
     void resetPaste() {
-        //printActions();
         final Action paste = component.getActionMap().get("paste");
+        //printActions();
         Action newpaste = new Action() {
 
             public Object getValue(String key) {
@@ -194,64 +193,6 @@ public class BlockModeHandler extends DocumentFilter implements ClipboardOwner {
         };
         component.getActionMap().put("paste", newpaste);
         //printActions();
-    }
-
-    public static void main(String[] args) {
-        final HashMap<String, Color> syntax = new HashMap<String, Color>();
-        syntax.put("import", Color.RED);
-        syntax.put("abstract", Color.BLUE);
-        syntax.put("boolean", Color.BLUE);
-        syntax.put("break", Color.BLUE);
-        syntax.put("byte", Color.BLUE);
-        syntax.put("byvalue", Color.BLUE);
-        syntax.put("case", Color.BLUE);
-        syntax.put("cast", Color.BLUE);
-        syntax.put("catch", Color.BLUE);
-
-        final LineWrapEditorKit kit = new LineWrapEditorKit();
-
-        final JXTextPane edit = new JXTextPane() {
-
-            @Override
-            protected EditorKit createDefaultEditorKit() {
-                return kit;
-            }
-        };
-
-        JButton button = new JButton("Load ...");
-        button.addActionListener(new ActionListener() {
-
-            public void actionPerformed(ActionEvent e) {
-                try {
-                    edit.setText(read("src/javax/swing/JXTextPane.java"));
-                } catch (Exception ex) {
-                    ex.printStackTrace();
-                }
-
-            }
-        });
-
-        //((AbstractDocument) edit.getDocument()).setDocumentFilter(new SyntaxColorizer(edit.getStyledDocument(), syntax));
-        ((AbstractDocument) edit.getDocument()).setDocumentFilter(new BlockModeHandler(edit));
-
-        JFrame frame = new JFrame("Block mode edition");
-        frame.getContentPane().add(new JScrollPane(edit));
-        frame.getContentPane().add(button, BorderLayout.SOUTH);
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setSize(800, 300);
-        frame.setVisible(true);
-    }
-
-    public static String read(String file) throws Exception {
-        FileReader fr = new FileReader(file);
-        BufferedReader br = new BufferedReader(fr);
-        StringBuffer sb = new StringBuffer();
-        String s;
-        while ((s = br.readLine()) != null) {
-            sb.append(s + "\n");
-        }
-        fr.close();
-        return sb.toString();
     }
 
     void resetCut() {
@@ -386,7 +327,7 @@ public class BlockModeHandler extends DocumentFilter implements ClipboardOwner {
         if (isBlockMode()) {
             Highlighter.Highlight[] selections = component.getHighlighter().getHighlights();
             if (selections != null && selections.length > 0) {
-                setBlockMode(false);
+                setBlockMode(false);//needed to not apply block mode insert which duplicate string for each selections
                 String[] lines = s.split("\n");
                 try {
                     int cnt = selections.length;
@@ -401,7 +342,7 @@ public class BlockModeHandler extends DocumentFilter implements ClipboardOwner {
                 } catch (Exception ex) {
                     ex.printStackTrace();
                 }
-                setBlockMode(true);
+                setBlockMode(true);//restore previous state
             } else {
                 try {
                     component.getDocument().insertString(component.getCaretPosition(), s, null);
@@ -478,7 +419,7 @@ public class BlockModeHandler extends DocumentFilter implements ClipboardOwner {
     }
 
     private void super_replace(DocumentFilter.FilterBypass b, int offset, int length, String text,
-                               AttributeSet attrs) throws BadLocationException {
+            AttributeSet attrs) throws BadLocationException {
         if (component == null) {
             return;
         }
