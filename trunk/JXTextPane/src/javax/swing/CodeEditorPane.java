@@ -33,7 +33,6 @@ public class CodeEditorPane extends LineNumbersTextPane {
         if (vertical_line > 0) {
             int xline = getFontMetrics(getFont()).stringWidth("a") * vertical_line + 2;
             g.setColor(vertical_line_color);
-            System.err.println((getVisibleRect().x + xline)+","+ getVisibleRect().y+","+ (getVisibleRect().x + xline)+","+ (getVisibleRect().y + getVisibleRect().height));
             g.drawLine(getVisibleRect().x + xline, getVisibleRect().y, getVisibleRect().x + xline, getVisibleRect().y + getVisibleRect().height);
         }
     }
