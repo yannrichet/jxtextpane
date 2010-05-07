@@ -19,7 +19,6 @@ public class CodeEditorPane extends LineNumbersTextPane {
 
     public CodeEditorPane() {
         super();
-        //super.setFont(Font.getFont(Font.MONOSPACED));
         super.setFont(Font.decode(Font.MONOSPACED+" 10"));
         init = true;
     }
