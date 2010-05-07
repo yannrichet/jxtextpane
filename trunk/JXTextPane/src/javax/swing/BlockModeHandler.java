@@ -37,11 +37,13 @@ public class BlockModeHandler extends DocumentFilter implements ClipboardOwner {
     JTextComponent component;
     Caret normal;
     BlockModeCaret block;
+    Color block_color = new Color(1.0f, 0.0f, 0.0f, 0.4f);
+
 
     public BlockModeHandler(JTextComponent component) {
         setTextComponent(component);
         normal = component.getCaret();
-        block = new BlockModeCaret(Color.RED);
+        block = new BlockModeCaret(block_color);
     }
 
     void setTextComponent(JTextComponent c) {
