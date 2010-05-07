@@ -1,7 +1,8 @@
 package javax.swing;
 
-
+import java.awt.AWTEvent;
 import java.awt.Component;
+import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
@@ -34,8 +35,6 @@ import org.jdesktop.swingx.JXEditorPane;
 import org.jdesktop.swingx.UIAction;
 import org.jdesktop.swingx.action.ActionManager;
 
-
-
 /**
  * Lacking class in swingX. Inspired from JTextPane implementation (in Swing) rlateed to JEditorPane.
  * Add Undo/Redo and search features.
@@ -44,10 +43,10 @@ import org.jdesktop.swingx.action.ActionManager;
  */
 public class JXTextPane extends JXEditorPane {
 
-    private final static String MYACTION_UNDO = "undo";
-    private final static String MYACTION_REDO = "redo";
-    private UndoableEditListener myundoHandler;
-    private UndoManager myundoManager;
+    private final static String ACTION_UNDO = "undo";
+    private final static String ACTION_REDO = "redo";
+    private UndoableEditListener doHandler;
+    private UndoManager doManager;
 
     public JXTextPane() {
         super();
@@ -57,11 +56,11 @@ public class JXTextPane extends JXEditorPane {
         getDocument().addUndoableEditListener(getUndoableEditListener());
 
         //from JXEditorPane
-        getActionMap().put(MYACTION_UNDO, new MyActions(MYACTION_UNDO));
-        getActionMap().put(MYACTION_REDO, new MyActions(MYACTION_REDO));
+        getActionMap().put(ACTION_UNDO, new DoActions(ACTION_UNDO));
+        getActionMap().put(ACTION_REDO, new DoActions(ACTION_REDO));
 
-        getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(KeyEvent.VK_Z, InputEvent.CTRL_MASK), MYACTION_UNDO);
-        getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(KeyEvent.VK_Y, InputEvent.CTRL_MASK), MYACTION_REDO);
+        getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(KeyEvent.VK_Z, InputEvent.CTRL_MASK), ACTION_UNDO);
+        getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(KeyEvent.VK_Y, InputEvent.CTRL_MASK), ACTION_REDO);
 
         putClientProperty(JEditorPane.HONOR_DISPLAY_PROPERTIES, Boolean.TRUE);
     }
@@ -72,10 +71,31 @@ public class JXTextPane extends JXEditorPane {
     }
 
     @Override
+    public void paste() { // To turn around ugly overloading of paste() in JXEditorPane ... (intended to handle html style, which is not our subject)
+        if (isEditable() && isEnabled()) {
+            //invokeAction("paste", TransferHandler.getPasteAction());
+            ActionMap map = getActionMap();
+            Action action = null;
+            if (map != null) {
+                action = map.get("paste");
+            }
+            int modifiers = 0;
+            AWTEvent currentEvent = EventQueue.getCurrentEvent();
+            if (currentEvent instanceof InputEvent) {
+                modifiers = ((InputEvent) currentEvent).getModifiers();
+            } else if (currentEvent instanceof ActionEvent) {
+                modifiers = ((ActionEvent) currentEvent).getModifiers();
+            }
+            action.actionPerformed(new ActionEvent(this, ActionEvent.ACTION_PERFORMED, (String) action.getValue(Action.NAME),
+                    EventQueue.getMostRecentEventTime(), modifiers));
+        }
+    }
+
+    @Override
     public void setText(String t) {
         //getDocument().removeUndoableEditListener(getUndoableEditListener());// pour debrayer lengthregistre undo/redo
         super.setText(t);
-        myundoManager.discardAllEdits();
+        doManager.discardAllEdits();
         //getDocument().addUndoableEditListener(getUndoableEditListener());
     }
 
@@ -112,18 +132,18 @@ public class JXTextPane extends JXEditorPane {
 
     //from JXEditorPane
     public UndoableEditListener getUndoableEditListener() {
-        if (myundoHandler == null) {
-            myundoHandler = new UndoHandler();
-            myundoManager = new UndoManager();
+        if (doHandler == null) {
+            doHandler = new UndoHandler();
+            doManager = new UndoManager();
         }
-        return myundoHandler;
+        return doHandler;
     }
 
     //from JXEditorPane
     private class UndoHandler implements UndoableEditListener {
 
         public void undoableEditHappened(UndoableEditEvent evt) {
-            myundoManager.addEdit(evt.getEdit());
+            doManager.addEdit(evt.getEdit());
             updateActionState();
         }
     }
@@ -147,8 +167,8 @@ public class JXTextPane extends JXEditorPane {
 
             public void run() {
                 ActionManager manager = ActionManager.getInstance();
-                manager.setEnabled(MYACTION_UNDO, myundoManager.canUndo());
-                manager.setEnabled(MYACTION_REDO, myundoManager.canRedo());
+                manager.setEnabled(ACTION_UNDO, doManager.canUndo());
+                manager.setEnabled(ACTION_REDO, doManager.canRedo());
             }
         };
         SwingUtilities.invokeLater(doEnabled);
@@ -161,24 +181,24 @@ public class JXTextPane extends JXEditorPane {
      * JW: these if-constructs are totally crazy ... we live in OO world!
      * 
      */
-    private class MyActions extends UIAction {
+    private class DoActions extends UIAction {
 
-        MyActions(String name) {
+        DoActions(String name) {
             super(name);
         }
 
         public void actionPerformed(ActionEvent evt) {
             String name = getName();
-            if (MYACTION_UNDO.equals(name)) {
+            if (ACTION_UNDO.equals(name)) {
                 try {
-                    myundoManager.undo();
+                    doManager.undo();
                 } catch (CannotUndoException ex) {
                     System.err.println("Could not undo");
                 }
                 updateActionState();
-            } else if (MYACTION_REDO.equals(name)) {
+            } else if (ACTION_REDO.equals(name)) {
                 try {
-                    myundoManager.redo();
+                    doManager.redo();
                 } catch (CannotRedoException ex) {
                     System.err.println("Could not redo");
                 }
@@ -192,11 +212,11 @@ public class JXTextPane extends JXEditorPane {
         @Override
         public boolean isEnabled(Object sender) {
             String name = getName();
-            if (MYACTION_UNDO.equals(name)) {
-                return isEditable() && myundoManager.canUndo();
+            if (ACTION_UNDO.equals(name)) {
+                return isEditable() && doManager.canUndo();
             }
-            if (MYACTION_REDO.equals(name)) {
-                return isEditable() && myundoManager.canRedo();
+            if (ACTION_REDO.equals(name)) {
+                return isEditable() && doManager.canRedo();
             }
             return true;
         }
@@ -608,6 +628,4 @@ public class JXTextPane extends JXEditorPane {
             throw new IllegalArgumentException("Must be StyledEditorKit");
         }
     }
-
-   
 }

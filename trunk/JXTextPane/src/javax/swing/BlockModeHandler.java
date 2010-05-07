@@ -1,5 +1,6 @@
 package javax.swing;
 
+import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics;
@@ -19,12 +20,14 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.beans.PropertyChangeListener;
+import java.io.BufferedReader;
+import java.io.FileReader;
 import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.util.HashMap;
+import java.util.StringTokenizer;
 import javax.swing.text.*;
 
-/**TODO change BlockMode Caret color, copy/paste
+/**TODO impl BlockMode copy/paste
  * DocumentFilter to support block mode selection. Selection highlighting is overloaded with custom one.
  * @author richet (heavily inspired by many searches on the web)
  */
@@ -50,8 +53,8 @@ public class BlockModeHandler extends DocumentFilter implements ClipboardOwner {
         component.setFont(Font.getFont(Font.MONOSPACED));
 
         resetCut();
-        resetPaste();
         resetCopy();
+        resetPaste();
 
         component.addKeyListener(new KeyAdapter() {
 
@@ -99,6 +102,7 @@ public class BlockModeHandler extends DocumentFilter implements ClipboardOwner {
 
     void resetCopy() {
         final Action copy = component.getActionMap().get("copy");
+        //printActions();
         Action newcopy = new Action() {
 
             public Object getValue(String key) {
@@ -136,9 +140,19 @@ public class BlockModeHandler extends DocumentFilter implements ClipboardOwner {
             }
         };
         component.getActionMap().put("copy", newcopy);
+        //printActions();
+    }
+
+    void printActions() {
+        System.err.println("ACTIONS:");
+        for (Object object : component.getActionMap().keys()) {
+            System.err.println(object + " " + component.getActionMap().get(object));
+        }
+        System.err.println("=======================");
     }
 
     void resetPaste() {
+        //printActions();
         final Action paste = component.getActionMap().get("paste");
         Action newpaste = new Action() {
 
@@ -177,10 +191,70 @@ public class BlockModeHandler extends DocumentFilter implements ClipboardOwner {
             }
         };
         component.getActionMap().put("paste", newpaste);
+        //printActions();
+    }
+
+    public static void main(String[] args) {
+        final HashMap<String, Color> syntax = new HashMap<String, Color>();
+        syntax.put("import", Color.RED);
+        syntax.put("abstract", Color.BLUE);
+        syntax.put("boolean", Color.BLUE);
+        syntax.put("break", Color.BLUE);
+        syntax.put("byte", Color.BLUE);
+        syntax.put("byvalue", Color.BLUE);
+        syntax.put("case", Color.BLUE);
+        syntax.put("cast", Color.BLUE);
+        syntax.put("catch", Color.BLUE);
+
+        final LineWrapEditorKit kit = new LineWrapEditorKit();
+
+        final JXTextPane edit = new JXTextPane() {
+
+            @Override
+            protected EditorKit createDefaultEditorKit() {
+                return kit;
+            }
+        };
+
+        JButton button = new JButton("Load ...");
+        button.addActionListener(new ActionListener() {
+
+            public void actionPerformed(ActionEvent e) {
+                try {
+                    edit.setText(read("src/javax/swing/JXTextPane.java"));
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
+
+            }
+        });
+
+        //((AbstractDocument) edit.getDocument()).setDocumentFilter(new SyntaxColorizer(edit.getStyledDocument(), syntax));
+        ((AbstractDocument) edit.getDocument()).setDocumentFilter(new BlockModeHandler(edit));
+
+        JFrame frame = new JFrame("Block mode edition");
+        frame.getContentPane().add(new JScrollPane(edit));
+        frame.getContentPane().add(button, BorderLayout.SOUTH);
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setSize(800, 300);
+        frame.setVisible(true);
+    }
+
+    public static String read(String file) throws Exception {
+        FileReader fr = new FileReader(file);
+        BufferedReader br = new BufferedReader(fr);
+        StringBuffer sb = new StringBuffer();
+        String s;
+        while ((s = br.readLine()) != null) {
+            sb.append(s + "\n");
+        }
+        fr.close();
+        return sb.toString();
     }
 
     void resetCut() {
         final Action cut = component.getActionMap().get("cut");
+        //printActions();
         Action newcut = new Action() {
 
             public Object getValue(String key) {
@@ -219,27 +293,14 @@ public class BlockModeHandler extends DocumentFilter implements ClipboardOwner {
             }
         };
         component.getActionMap().put("cut", newcut);
+        //printActions();
     }
 
-    /*private void copy()
-    {
-    Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
-    TransferHandler transferHandler = jTextComponent.getTransferHandler();
-    transferHandler.exportToClipboard(jTextComponent, clipboard, TransferHandler.COPY);
-    }
-    
-    private void paste()
-    {
-    Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
-    TransferHandler transferHandler = jTextComponent.getTransferHandler();
-    transferHandler.importData(jTextComponent, clipboard.getContents(null));
-    }*/
     /**
      * Place a String on the clipboard, and make this class the
      * owner of the Clipboard's contents.
      */
     void setClipboardContents(String aString) {
-        System.err.println("setClipboardContents");
         Transferable stringSelection = new StringSelection(aString);
         Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
         clipboard.setContents(stringSelection, this);
@@ -255,14 +316,12 @@ public class BlockModeHandler extends DocumentFilter implements ClipboardOwner {
      * empty String.
      */
     String getClipboardContents() {
-        System.err.println("getClipboardContents\n=====================");
         Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
         //odd: the Object param of getContents is not currently used
         Transferable contents = clipboard.getContents(this);
         String data = "";
         try {
             data = (String) contents.getTransferData(DataFlavor.stringFlavor);
-            System.err.println(data + "\n=====================");
         } catch (UnsupportedFlavorException ex) {
             ex.printStackTrace();
         } catch (IOException ex) {
@@ -273,7 +332,7 @@ public class BlockModeHandler extends DocumentFilter implements ClipboardOwner {
     }
 
     public void lostOwnership(Clipboard clpbrd, Transferable t) {
-        System.err.println("lostOwnership");
+        //System.err.println("lostOwnership");
     }
 
     public String getSelectedBlock() {
@@ -319,7 +378,6 @@ public class BlockModeHandler extends DocumentFilter implements ClipboardOwner {
     }
 
     public void pasteAsBlock(String s) {//TODO choose strategy and implement
-        System.err.println("pasteAsBlock:\n" + s);
         if (component == null) {
             return;
         }
@@ -413,7 +471,7 @@ public class BlockModeHandler extends DocumentFilter implements ClipboardOwner {
     }
 
     private void super_replace(DocumentFilter.FilterBypass b, int offset, int length, String text,
-            AttributeSet attrs) throws BadLocationException {
+                               AttributeSet attrs) throws BadLocationException {
         if (component == null) {
             return;
         }
