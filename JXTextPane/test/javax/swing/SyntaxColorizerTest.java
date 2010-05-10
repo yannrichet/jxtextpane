@@ -4,6 +4,8 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.StringWriter;
+import java.io.Writer;
 import java.util.HashMap;
 import javax.swing.text.AbstractDocument;
 import javax.swing.text.BadLocationException;
@@ -87,6 +89,16 @@ public class SyntaxColorizerTest {
             public void actionPerformed(ActionEvent e) {
                 try {
                     edit.setText(read("src/javax/swing/JXTextPane.java"));
+
+                    try {
+                        Writer s = new StringWriter();
+                        SyntaxHTMLWriter w = new SyntaxHTMLWriter(s, edit.getStyledDocument());
+                        w.write();
+                        s.close();
+                        System.out.println(s.toString());
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                    }
                 } catch (Exception ex) {
                     ex.printStackTrace();
                 }

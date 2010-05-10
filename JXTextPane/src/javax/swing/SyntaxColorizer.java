@@ -6,8 +6,7 @@ import javax.swing.event.UndoableEditListener;
 import javax.swing.text.*;
 
 /**This calls supports syntax dependant colorization. RegExp are available if RegExpHashMap is used to give KeyWords,
- * TODO ctrl-space for completion, advanced strucuture completion (if ... else ...?)
- * TODO: HTML export of content of this component*/
+ * TODO ctrl-space for completion, advanced strucuture completion (if ... else ...?)*/
 class SyntaxColorizer extends DocumentFilter {
 
     private StyledDocument doc;
