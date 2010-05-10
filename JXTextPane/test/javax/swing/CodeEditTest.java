@@ -30,10 +30,15 @@ public class CodeEditTest {
 
         edit.setKeywordColor(syntax);
 
+        HashMap<String, String> help = new HashMap<String, String>();
+        help.put("boolean", "???");
+        help.put("booleeeaaa", "???");
+        edit.setKeywordHelp(help);
+
         edit.setText(read("src/javax/swing/JXTextPane.java"));
 
         edit.setVerticalLineAtPos(80);
-        
+
         JFrame frame = new JFrame("Code editor");
         frame.getContentPane().add(edit.getContainerWithLines());
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);

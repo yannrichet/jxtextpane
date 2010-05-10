@@ -15,12 +15,10 @@ import javax.swing.text.StyleContext;
 import javax.swing.text.StyledDocument;
 import javax.xml.XMLConstants;
 
-/**
- *
+/**Class to add more complete HTML rendering than just bold, italic and underline.
+ * Following StyleConstants are supported: Foreground, Backgournd, FontSize, FontFamiliy
  * @author richet
  */
-/**Class to add more complete HTML rendering than just bold, italic and underline.
-Following StyleConstants are supported: Foreground, Backgournd, FontSize, FontFamiliy */
 public class SyntaxHTMLWriter extends AbstractWriter {
 
     public static String toXML(String src) {
