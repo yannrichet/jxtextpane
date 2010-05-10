@@ -70,6 +70,9 @@ public class JXTextPane extends JXEditorPane {
         addMouseWheelListener(new MouseWheelListener() {
 
             public void mouseWheelMoved(MouseWheelEvent e) {
+                if (!e.isControlDown()) {
+                    return;
+                }
                 if (e.getWheelRotation() > 0) {
                     setFont(getFont().deriveFont(getFont().getSize2D() - 1.0f));
                 } else {
