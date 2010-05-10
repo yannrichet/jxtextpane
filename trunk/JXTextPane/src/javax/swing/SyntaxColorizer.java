@@ -62,7 +62,7 @@ class SyntaxColorizer extends DocumentFilter {
             ((RegExpHashMap) keywords).keyAsRegexp = true;
         }
     }
-
+    
     public static class RegExpHashMap extends HashMap {
 
         public boolean keyAsRegexp = true;
