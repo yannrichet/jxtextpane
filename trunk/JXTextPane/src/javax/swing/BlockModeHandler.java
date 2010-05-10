@@ -1,6 +1,5 @@
 package javax.swing;
 
-import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics;
@@ -15,20 +14,14 @@ import java.awt.datatransfer.StringSelection;
 import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.beans.PropertyChangeListener;
-import java.io.BufferedReader;
-import java.io.FileReader;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.StringTokenizer;
 import javax.swing.text.*;
 
-/**
- * DocumentFilter to support block mode selection. Selection highlighting is overloaded with custom one.
+/** DocumentFilter to support block mode selection. Selection highlighting is overloaded with custom one.
  * @author richet (heavily inspired by many searches on the web)
  */
 public class BlockModeHandler extends DocumentFilter implements ClipboardOwner {
@@ -419,7 +412,7 @@ public class BlockModeHandler extends DocumentFilter implements ClipboardOwner {
     }
 
     private void super_replace(DocumentFilter.FilterBypass b, int offset, int length, String text,
-            AttributeSet attrs) throws BadLocationException {
+                               AttributeSet attrs) throws BadLocationException {
         if (component == null) {
             return;
         }
@@ -597,8 +590,14 @@ public class BlockModeHandler extends DocumentFilter implements ClipboardOwner {
                     return null;
                 }
             }
-            g.fillRect(alloc.x, alloc.y, alloc.width, alloc.height);
-            return alloc;
+
+            g.fillRect(alloc.x, alloc.y, alloc.width + 1, alloc.height);
+            
+            try {
+                return view.modelToView(offs0, Position.Bias.Forward, offs1 + 1, Position.Bias.Backward, bounds);
+            } catch (BadLocationException ex) {
+                return alloc;
+            }
         }
         protected Color color; // The color for the underline
     }
