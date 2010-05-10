@@ -66,20 +66,6 @@ public class JXTextPane extends JXEditorPane {
         getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(KeyEvent.VK_Y, InputEvent.CTRL_MASK), ACTION_REDO);
 
         putClientProperty(JEditorPane.HONOR_DISPLAY_PROPERTIES, Boolean.TRUE);
-
-        addMouseWheelListener(new MouseWheelListener() {
-
-            public void mouseWheelMoved(MouseWheelEvent e) {
-                if (!e.isControlDown()) {
-                    return;
-                }
-                if (e.getWheelRotation() > 0) {
-                    setFont(getFont().deriveFont(getFont().getSize2D() - 1.0f));
-                } else {
-                    setFont(getFont().deriveFont(getFont().getSize2D() + 1.0f));
-                }
-            }
-        });
     }
 
     @Override

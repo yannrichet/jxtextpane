@@ -1,6 +1,5 @@
 package javax.swing;
 
-import java.awt.Color;
 import java.awt.Container;
 import java.awt.Graphics;
 import java.awt.Point;
@@ -8,6 +7,9 @@ import java.awt.event.AdjustmentEvent;
 import java.awt.event.AdjustmentListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseWheelEvent;
+import java.awt.event.MouseWheelListener;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
 import javax.swing.text.EditorKit;
@@ -72,6 +74,24 @@ public class LineNumbersTextPane extends JXTextPane {
             }
         });
 
+        addMouseWheelListener(new MouseAdapter() {
+
+            @Override
+            public void mouseWheelMoved(MouseWheelEvent e) {
+                if (e.isControlDown()) {
+                    if (e.getWheelRotation() > 0) {
+                        setFont(getFont().deriveFont(getFont().getSize2D() - 1.0f));
+                    } else {
+                        setFont(getFont().deriveFont(getFont().getSize2D() + 1.0f));
+                    }
+                    updateLineNumberDivider();
+                } else {
+                    for (MouseWheelListener m : jScrollPane1.getMouseWheelListeners()) {
+                        m.mouseWheelMoved(e);
+                    }
+                }
+            }
+        });
         //System.err.println("  Init done.");
     }
 
