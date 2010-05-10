@@ -8,6 +8,8 @@ import java.awt.Graphics;
 import java.awt.event.ActionEvent;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
+import java.awt.event.MouseWheelEvent;
+import java.awt.event.MouseWheelListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.IOException;
@@ -40,7 +42,6 @@ import org.jdesktop.swingx.action.ActionManager;
 /**
  * Lacking class in swingX. Inspired from JTextPane implementation (in Swing) rlateed to JEditorPane.
  * Add Undo/Redo and search features.
- * TODO add ctrl+mouse wheel for font size control
  * @author richet (heavily inspired by swingX code)
  */
 public class JXTextPane extends JXEditorPane {
@@ -65,6 +66,17 @@ public class JXTextPane extends JXEditorPane {
         getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(KeyEvent.VK_Y, InputEvent.CTRL_MASK), ACTION_REDO);
 
         putClientProperty(JEditorPane.HONOR_DISPLAY_PROPERTIES, Boolean.TRUE);
+
+        addMouseWheelListener(new MouseWheelListener() {
+
+            public void mouseWheelMoved(MouseWheelEvent e) {
+                if (e.getWheelRotation() > 0) {
+                    setFont(getFont().deriveFont(getFont().getSize2D() - 1.0f));
+                } else {
+                    setFont(getFont().deriveFont(getFont().getSize2D() + 1.0f));
+                }
+            }
+        });
     }
 
     @Override
