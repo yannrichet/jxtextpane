@@ -39,8 +39,7 @@
                 <include name="*.jar"/>
             </fileset>
         </unjar-->
-        <jar jarfile="${dist}/lib/${ant.project.name}.jar" basedir="${build}" />
-        <zip basedir="${dist}/lib" destfile="${dist}/libRsession.zip"/>
+        <jar jarfile="${dist}/${ant.project.name}.jar" basedir="${build}" />
     </target>
 
     <target name="test" depends="compile">
