@@ -30,7 +30,7 @@ public class BlockModeHandler extends DocumentFilter implements ClipboardOwner {
     JTextComponent component;
     Caret normal;
     BlockModeCaret block;
-    Color block_color = new Color(1.0f, 0.0f, 0.0f, 0.4f);
+    Color block_color = new Color(0.2f, 0.8f, 0.2f, 0.4f);
 
     public BlockModeHandler(JTextComponent component) {
         setTextComponent(component);
@@ -591,10 +591,11 @@ public class BlockModeHandler extends DocumentFilter implements ClipboardOwner {
                 }
             }
 
-            g.fillRect(alloc.x, alloc.y, alloc.width + 1, alloc.height);
-            
+            g.fillRect(alloc.x, alloc.y, alloc.width + 2, alloc.height);
             try {
-                return view.modelToView(offs0, Position.Bias.Forward, offs1 + 1, Position.Bias.Backward, bounds);
+                int luoffset = c.viewToModel(new Point(Math.min(c.modelToView(offs0).x, c.modelToView(offs1).x), Math.min(c.modelToView(offs0).y, c.modelToView(offs1).y)));
+                int rloffset = c.viewToModel(new Point(Math.max(c.modelToView(offs0).x, c.modelToView(offs1).x), Math.max(c.modelToView(offs0).y, c.modelToView(offs1).y)));
+                return view.modelToView(luoffset, Position.Bias.Forward, rloffset + 1, Position.Bias.Backward, bounds);
             } catch (BadLocationException ex) {
                 return alloc;
             }
