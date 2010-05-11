@@ -5,8 +5,7 @@ import java.util.*;
 import javax.swing.event.UndoableEditListener;
 import javax.swing.text.*;
 
-/**This calls supports syntax dependant colorization. RegExp are available if RegExpHashMap is used to give KeyWords,
- * TODO ctrl-space for completion, advanced strucuture completion (if ... else ...?)*/
+/**This DocumentFilter supports syntax dependant colorization. RegExp are available if RegExpHashMap is used to give KeyWords*/
 class SyntaxColorizer extends DocumentFilter {
 
     private StyledDocument doc;
@@ -62,7 +61,8 @@ class SyntaxColorizer extends DocumentFilter {
             ((RegExpHashMap) keywords).keyAsRegexp = true;
         }
     }
-    
+
+    /** Here is a way to handle regexp on keywords.*/
     public static class RegExpHashMap extends HashMap {
 
         public boolean keyAsRegexp = true;
@@ -79,7 +79,6 @@ class SyntaxColorizer extends DocumentFilter {
             } else {
                 for (Object regexp_key : super.keySet()) {
                     if (o.toString().equals(regexp_key.toString())) {
-                        Object found = super.get(regexp_key.toString());
                         return true;
                     }
                 }
