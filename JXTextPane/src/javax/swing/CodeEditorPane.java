@@ -1,21 +1,27 @@
 package javax.swing;
 
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.util.HashMap;
+import java.util.LinkedList;
 import javax.swing.event.MenuKeyEvent;
 import javax.swing.event.MenuKeyListener;
 import javax.swing.text.AbstractDocument;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.EditorKit;
 
-/**
- * Top level class to handle code syntax and advanced edition features.
+/** Top level class to handle code syntax and advanced edition features.
  * @author richet
  */
 public class CodeEditorPane extends LineNumbersTextPane {
@@ -29,8 +35,8 @@ public class CodeEditorPane extends LineNumbersTextPane {
 
     public CodeEditorPane() {
         super();
-        super.setFont(Font.decode(Font.MONOSPACED + " " + DEFAULT_FONT_SIZE));
         init = true;
+        setFont(Font.decode(Font.MONOSPACED + " " + DEFAULT_FONT_SIZE));
 
         completionMenu = new JPopupMenu() {
 
@@ -42,39 +48,42 @@ public class CodeEditorPane extends LineNumbersTextPane {
         };
 
         completionMenu.setBackground(Color.WHITE);
+        completionMenu.setFont(getFont());
+        completionMenu.addKeyListener(new KeyAdapter() {
+
+            @Override
+            public void keyPressed(KeyEvent e) {//To handle cycling of suggestions with completion key
+                if (isCompletionKeyEvent(e)) {
+                    MenuElement[] el = MenuSelectionManager.defaultManager().getSelectedPath();
+                    KeyWordItem selected = (KeyWordItem) el[el.length - 1];
+                    int sel = completionMenu.getComponentIndex(selected);
+                    MenuSelectionManager.defaultManager().setSelectedPath(((KeyWordItem) completionMenu.getComponent((sel + 1) % completionMenu.getComponentCount())).path);
+
+                }
+                super.keyPressed(e);
+            }
+        });
 
         addKeyListener(new KeyAdapter() {
 
             @Override
             public void keyPressed(KeyEvent e) {
                 super.keyPressed(e);
-                if (e.isControlDown() && e.getKeyCode() == KeyEvent.VK_SPACE) {
+                if (isCompletionKeyEvent(e)) {
+                    String txt = getText();
+                    String before = txt.substring(0, getCaretPosition());
+                    String after = txt.substring(getCaretPosition());
 
-                    String base = "";
-                    int i = 1;
-                    char c;
-                    try {
-                        c = getText(getCaretPosition() - i, i).charAt(0);
-                        while (Character.isLetterOrDigit(c)) {
-                            base = c + base;
-                            i++;
-                            c = getText(getCaretPosition() - i, i).charAt(0);
-                        }
-                    } catch (BadLocationException ex) {
-                        ex.printStackTrace();
-                    }
-                    System.err.println(base);
-                    if (base.length() <= 0) {
+                    LinkedList<KeyWordItem> items = buildCompletionMenu(before, after);
+                    if (items == null || items.size() == 0) {
                         return;
                     }
 
                     completionMenu.removeAll();
                     int n = 0;
-                    for (String k : help.keySet()) {
-                        if (k.startsWith(base)) {
-                            completionMenu.add(new KeyWordItem(k, completionMenu, i));
-                            n++;
-                        }
+                    for (KeyWordItem k : items) {
+                        completionMenu.add(k);
+                        n++;
                     }
                     if (n > 0) {
                         try {
@@ -93,7 +102,42 @@ public class CodeEditorPane extends LineNumbersTextPane {
         });
     }
 
-    class KeyWordItem extends JMenu {
+    /** Method to override for more flexible (and clever:) completion strategy.
+    This impl. is just default: suggest complete word with matching begining.*/
+    LinkedList<KeyWordItem> buildCompletionMenu(String beforeCaret, String afterCaret) {
+        String base = "";
+        int i = 1;
+        char c;
+        c = beforeCaret.charAt(beforeCaret.length() - i);
+        while (Character.isLetterOrDigit(c)) {
+            base = c + base;
+            i++;
+            if (((getCaretPosition() - i) >= 0)) {
+                c = beforeCaret.charAt(beforeCaret.length() - i);
+            } else {
+                break;
+            }
+        }
+
+        if (base.length() <= 0) {
+            return null;
+        }
+
+        LinkedList<KeyWordItem> items = new LinkedList<KeyWordItem>();
+        for (String k : help.keySet()) {
+            if (k.startsWith(base)) {
+                items.add(new KeyWordItem(k, completionMenu, i));
+            }
+        }
+        return items;
+    }
+
+    /**Method to override for changing completion key*/
+    boolean isCompletionKeyEvent(KeyEvent e) {
+        return e.isControlDown() && e.getKeyCode() == KeyEvent.VK_SPACE;
+    }
+
+    class KeyWordItem extends JMenu {//TODO: help content may be displayed automatically when this menu is selected...
 
         String name;
         MenuElement[] path = new MenuElement[2];
@@ -114,16 +158,19 @@ public class CodeEditorPane extends LineNumbersTextPane {
             this.name = name;
             this.alreadywriten = alreadywriten;
             setText(name);
-            if (alreadywriten == name.length()) {
-                add(help.get(name));
+            setFont(completionMenu.getFont());
+
+            if (help.get(name).length() > 0) {
+                add(new JMenuItem(help.get(name)));
             }
+
             path[0] = parent;
             path[1] = this;
             this.addMenuKeyListener(new MenuKeyListener() {
 
                 public void menuKeyTyped(MenuKeyEvent e) {
                     MenuElement[] path = MenuSelectionManager.defaultManager().getSelectedPath();
-                    KeyWordItem item = (KeyWordItem) path[path.length - 1];
+                    KeyWordItem item = (KeyWordItem) path[1];
                     int code = e.getKeyChar();
                     if (code == KeyEvent.VK_ENTER && item.name.equals(name)) {
                         getAction().actionPerformed(null);
@@ -136,6 +183,7 @@ public class CodeEditorPane extends LineNumbersTextPane {
                 public void menuKeyReleased(MenuKeyEvent e) {
                 }
             });
+            
         }
     }
 
@@ -147,7 +195,11 @@ public class CodeEditorPane extends LineNumbersTextPane {
     public void paint(Graphics g) {
         super.paint(g);
         if (vertical_line > 0) {
-            int xline = getFontMetrics(getFont()).stringWidth("a") * vertical_line + 2;
+            if (reset_font_width) {
+                font_width = getFontMetrics(getFont()).stringWidth(font_width_ex);
+                reset_font_width = false;
+            }
+            int xline = font_width * vertical_line + 2;
             g.setColor(vertical_line_color);
             g.drawLine(getVisibleRect().x + xline, getVisibleRect().y, getVisibleRect().x + xline, getVisibleRect().y + getVisibleRect().height);
         }
@@ -169,6 +221,9 @@ public class CodeEditorPane extends LineNumbersTextPane {
     protected EditorKit createDefaultEditorKit() {
         return new LineWrapEditorKit();
     }
+    int font_width = 0;
+    String font_width_ex = "a";
+    boolean reset_font_width = true;
 
     @Override
     public void setFont(Font font) {
@@ -179,6 +234,7 @@ public class CodeEditorPane extends LineNumbersTextPane {
             throw new IllegalArgumentException("Only " + Font.getFont(Font.MONOSPACED).getName() + " is authorized in such component.");
         } else {
             super.setFont(font);
+            reset_font_width = true;
         }
     }
 }

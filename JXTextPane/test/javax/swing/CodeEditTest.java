@@ -33,6 +33,7 @@ public class CodeEditTest {
         HashMap<String, String> help = new HashMap<String, String>();
         help.put("boolean", "???");
         help.put("booleeeaaa", "???");
+        help.put("booleeeaaannn", "");
         edit.setKeywordHelp(help);
 
         edit.setText(read("src/javax/swing/JXTextPane.java"));
