@@ -98,7 +98,7 @@ public class CodeEditorPane extends LineNumbersTextPane {
 
     @Override
     public String getSelectedText() {
-        if (blockDocumentFilter.isBlockMode()) {
+        if (blockDocumentFilter!=null && blockDocumentFilter.isBlockMode()) {
             return blockDocumentFilter.getSelectedBlock();
         } else {
             return super.getSelectedText();
@@ -221,7 +221,7 @@ public class CodeEditorPane extends LineNumbersTextPane {
             ((AbstractDocument) this.getDocument()).setDocumentFilter(blockDocumentFilter);
         } else {
             blockDocumentFilter = new BlockModeHandler(this);
-            syntaxDocumentFilter = new SyntaxColorizer(this.getStyledDocument(), keywords);
+            syntaxDocumentFilter = new SyntaxColorizer(this, keywords);
             ((AbstractDocument) this.getDocument()).setDocumentFilter(new DocumentFilterChain(syntaxDocumentFilter, blockDocumentFilter));
         }
     }

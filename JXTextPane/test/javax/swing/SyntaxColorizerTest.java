@@ -106,7 +106,7 @@ public class SyntaxColorizerTest {
             }
         });
 
-        ((AbstractDocument) edit.getDocument()).setDocumentFilter(new SyntaxColorizer(edit.getStyledDocument(), syntax));
+        ((AbstractDocument) edit.getDocument()).setDocumentFilter(new SyntaxColorizer(edit, syntax));
 
         JFrame frame = new JFrame("Syntax Highlighting");
         frame.getContentPane().add(new JScrollPane(edit));

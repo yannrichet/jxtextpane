@@ -51,7 +51,7 @@ public class DocumentFilterChainTest {
         });
 
         //DocumentFilterChain df = new DocumentFilterChain(new SyntaxColorizer(edit.getStyledDocument(), syntax2),new SyntaxColorizer(edit.getStyledDocument(), syntax1));
-        DocumentFilterChain df = new DocumentFilterChain(new SyntaxColorizer(edit.getStyledDocument(), syntax2),new BlockModeHandler(edit));
+        DocumentFilterChain df = new DocumentFilterChain(new SyntaxColorizer(edit, syntax2),new BlockModeHandler(edit));
         ((AbstractDocument) edit.getDocument()).setDocumentFilter(df);
 
         //((AbstractDocument) edit.getDocument()).setDocumentFilter(new SyntaxColorizer(edit.getStyledDocument(), syntax));

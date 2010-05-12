@@ -18,12 +18,9 @@ class SyntaxColorizer extends DocumentFilter {
     private HashMap<Color, MutableAttributeSet> colors;
     UndoableEditListener undo;
 
-    public void setUndoableEditListener(UndoableEditListener undo) {
-        this.undo = undo;
-    }
-
-    public SyntaxColorizer(StyledDocument doc, HashMap<String, Color> keywords) {
-        this.doc = doc;
+    public SyntaxColorizer(JXTextPane component, HashMap<String, Color> keywords) {
+        this.doc = component.getStyledDocument();
+        this.undo = component.getUndoableEditListener();
 
         rootElement = doc.getDefaultRootElement();
         doc.putProperty(DefaultEditorKit.EndOfLineStringProperty, "\n");
@@ -113,9 +110,9 @@ class SyntaxColorizer extends DocumentFilter {
 
     @Override
     public void insertString(DocumentFilter.FilterBypass b, int offset, String str, AttributeSet a) throws BadLocationException {
-        if (str.equals("{")) {
-            str = addMatchingBrace(offset);
-        }
+        /*if (str.equals("{")) {
+        str = addMatchingBrace(offset);
+        }*/
 
         b.insertString(offset, str, a);
         if (undo != null) {
@@ -438,7 +435,7 @@ class SyntaxColorizer extends DocumentFilter {
             doc.setCharacterAttributes(startOffset, endOfToken - startOffset, colors.get(keywords.get(token)), false);
         }
 
-        return endOfToken + 1;
+        return endOfToken;
     }
 
     /*
@@ -553,22 +550,22 @@ class SyntaxColorizer extends DocumentFilter {
     /*
      *
      */
-    protected String addMatchingBrace(int offset) throws BadLocationException {
-        StringBuffer whiteSpace = new StringBuffer();
-        int line = rootElement.getElementIndex(offset);
-        int i = rootElement.getElement(line).getStartOffset();
+    /*protected String addMatchingBrace(int offset) throws BadLocationException {
+    StringBuffer whiteSpace = new StringBuffer();
+    int line = rootElement.getElementIndex(offset);
+    int i = rootElement.getElement(line).getStartOffset();
 
-        while (true) {
-            String temp = doc.getText(i, 1);
+    while (true) {
+    String temp = doc.getText(i, 1);
 
-            if (temp.equals(" ") || temp.equals("\t")) {
-                whiteSpace.append(temp);
-                i++;
-            } else {
-                break;
-            }
-        }
-
-        return "{\n" + whiteSpace.toString() + "\t\n" + whiteSpace.toString() + "}";
+    if (temp.equals(" ") || temp.equals("\t")) {
+    whiteSpace.append(temp);
+    i++;
+    } else {
+    break;
     }
+    }
+
+    return "{\n" + whiteSpace.toString() + "\t\n" + whiteSpace.toString() + "}";
+    }*/
 }
