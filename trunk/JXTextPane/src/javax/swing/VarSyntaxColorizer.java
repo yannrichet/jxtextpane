@@ -390,7 +390,14 @@ public class VarSyntaxColorizer extends DocumentFilter {
 
             /*if (isQuoteDelimiter(content.substring(startOffset, startOffset + 1))) {
             startOffset = getQuoteToken(content, startOffset, endOffset);
-            } else*/ if (isParamStarter(content.charAt(startOffset))) {
+            } else*/
+          
+            if (Character.isWhitespace(content.charAt(startOffset))) {
+                startOffset++;
+                continue;
+            }
+
+            if (isParamStarter(content.charAt(startOffset))) {
                 startOffset = processParamToken(content, startOffset, endOffset);
             } else {
                 startOffset = processOtherToken(content, startOffset, endOffset);
@@ -432,9 +439,9 @@ public class VarSyntaxColorizer extends DocumentFilter {
     return endOfQuote + 1;
     }*/
     private int processParamToken(String content, int startOffset, int endOffset) {
+        //System.err.println("processParamToken " + content.substring(startOffset, endOffset));
         char paramStarter = content.charAt(startOffset);
         int endOfParam = startOffset + 1;
-        System.err.println("getParamToken " + content.substring(startOffset, startOffset + 10).replace('\n', ' ') + "...");
         if (paramStarter == '@') {
             char o = '{';
             char c = '}';
@@ -456,7 +463,7 @@ public class VarSyntaxColorizer extends DocumentFilter {
                 }
                 n++;
             }
-            endOfParam = startOffset + n - 1;
+            endOfParam = startOffset + n + 1;
         } else {//paramStarter == '$'
             char o = '(';
             char c = ')';
@@ -473,7 +480,6 @@ public class VarSyntaxColorizer extends DocumentFilter {
         }
 
         doc.setCharacterAttributes(startOffset, endOfParam - startOffset + 1, var, false);
-        System.err.println("    -> " + (endOfParam - startOffset + 1));
 
         return endOfParam + 1;
     }
@@ -482,16 +488,14 @@ public class VarSyntaxColorizer extends DocumentFilter {
      *
      */
     private int processOtherToken(String content, int startOffset, int endOffset) {
-        int endOfToken = startOffset;
+        //System.err.println("processOtherToken " + content.substring(startOffset, endOffset));
+        int endOfToken = startOffset + 1;
 
-        /*while (endOfToken <= endOffset) {
-        if (isDelimiter(content.substring(endOfToken, endOfToken + 1))) {
-        break;
-        }
-        
-        endOfToken++;
-        }*/
-        while (endOfToken <= endOffset && (!Character.isWhitespace(content.charAt(endOfToken)))) {
+        while (endOfToken <= endOffset) {
+
+            if (Character.isWhitespace(content.charAt(endOfToken)) || isParamStarter(content.charAt(endOfToken))) {
+                break;
+            }
             endOfToken++;
         }
 
@@ -501,7 +505,7 @@ public class VarSyntaxColorizer extends DocumentFilter {
             doc.setCharacterAttributes(startOffset, endOfToken - startOffset, colors.get(keywords.get(token)), false);
         }
 
-        return endOfToken + 1;
+        return endOfToken;
     }
 
     /*
@@ -579,10 +583,10 @@ public class VarSyntaxColorizer extends DocumentFilter {
 
     protected boolean isParamStarter(char character) {
         if ((character == '@') || (character == '$')) {
-            System.err.print("  ??? " + character);
+            //System.err.print("  ??? " + character);
             return true;
         } else {
-            System.err.print(character);
+            //System.err.print(character);
             return false;
         }
     }
