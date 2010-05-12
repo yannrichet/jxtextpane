@@ -108,6 +108,9 @@ public class CodeEditorPane extends LineNumbersTextPane {
     /** Method to override for more flexible (and clever:) completion strategy.
     This impl. is just default: suggest complete word with matching begining.*/
     LinkedList<KeyWordItem> buildCompletionMenu(String beforeCaret, String afterCaret) {
+        if (beforeCaret.length() == 0 || help==null || help.isEmpty()) {
+            return null;
+        }
         String base = "";
         int i = 1;
         char c;
