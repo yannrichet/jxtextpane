@@ -1,16 +1,10 @@
 package javax.swing;
 
 import java.awt.Color;
-import java.awt.Component;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.FocusAdapter;
-import java.awt.event.FocusEvent;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.util.HashMap;
@@ -102,6 +96,15 @@ public class CodeEditorPane extends LineNumbersTextPane {
         });
     }
 
+    @Override
+    public String getSelectedText() {
+        if (blockDocumentFilter.isBlockMode()) {
+            return blockDocumentFilter.getSelectedBlock();
+        } else {
+            return super.getSelectedText();
+        }
+    }
+
     /** Method to override for more flexible (and clever:) completion strategy.
     This impl. is just default: suggest complete word with matching begining.*/
     LinkedList<KeyWordItem> buildCompletionMenu(String beforeCaret, String afterCaret) {
@@ -147,10 +150,12 @@ public class CodeEditorPane extends LineNumbersTextPane {
             super(new AbstractAction(name) {
 
                 public void actionPerformed(ActionEvent e) {
-                    try {
-                        getDocument().insertString(getCaretPosition(), name.substring(alreadywriten - 1), null);
-                    } catch (BadLocationException ex) {
-                        ex.printStackTrace();
+                    if (isEditable()) {
+                        try {
+                            getDocument().insertString(getCaretPosition(), name.substring(alreadywriten - 1), null);
+                        } catch (BadLocationException ex) {
+                            ex.printStackTrace();
+                        }
                     }
                     completionMenu.setVisible(false);
                 }
@@ -183,7 +188,7 @@ public class CodeEditorPane extends LineNumbersTextPane {
                 public void menuKeyReleased(MenuKeyEvent e) {
                 }
             });
-            
+
         }
     }
 
@@ -204,12 +209,17 @@ public class CodeEditorPane extends LineNumbersTextPane {
             g.drawLine(getVisibleRect().x + xline, getVisibleRect().y, getVisibleRect().x + xline, getVisibleRect().y + getVisibleRect().height);
         }
     }
+    BlockModeHandler blockDocumentFilter;
+    SyntaxColorizer syntaxDocumentFilter;
 
     public void setKeywordColor(HashMap<String, Color> keywords) {
         if (keywords == null) {
-            ((AbstractDocument) this.getDocument()).setDocumentFilter(new BlockModeHandler(this));
+            blockDocumentFilter = new BlockModeHandler(this);
+            ((AbstractDocument) this.getDocument()).setDocumentFilter(blockDocumentFilter);
         } else {
-            ((AbstractDocument) this.getDocument()).setDocumentFilter(new DocumentFilterChain(new SyntaxColorizer(this.getStyledDocument(), keywords), new BlockModeHandler(this)));
+            blockDocumentFilter = new BlockModeHandler(this);
+            syntaxDocumentFilter = new SyntaxColorizer(this.getStyledDocument(), keywords);
+            ((AbstractDocument) this.getDocument()).setDocumentFilter(new DocumentFilterChain(syntaxDocumentFilter, blockDocumentFilter));
         }
     }
 
