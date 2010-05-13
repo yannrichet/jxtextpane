@@ -52,7 +52,6 @@ public class VarSyntaxColorizer extends DocumentFilter {
         setKeywordColor(keywords);
     }
 
-//TODO setKeywordBackgroundColor, setKeywordItalic, setKeywordBold, setKeywordUnderline
     public void setKeywordColor(HashMap<String, Color> keywords) {
         colors = new HashMap<Color, MutableAttributeSet>();
         this.keywords = keywords;
@@ -300,6 +299,13 @@ public class VarSyntaxColorizer extends DocumentFilter {
             endOffset = contentLength - 1;
         }
 
+        //  check for var line
+
+        if (content.startsWith("//R<",startOffset)) {
+            doc.setCharacterAttributes(startOffset, lineLength, var, true);
+            return;
+        }
+
         //  check for multi line comments
         //  (always set the comment attribute for the entire line)
 
@@ -317,7 +323,6 @@ public class VarSyntaxColorizer extends DocumentFilter {
         //  check for single line comment
 
         int index = content.indexOf(getSingleLineDelimiter(), startOffset);
-
         if ((index > -1) && (index < endOffset)) {
             doc.setCharacterAttributes(index, endOffset - index + 1, comment, false);
             endOffset = index - 1;
@@ -391,7 +396,7 @@ public class VarSyntaxColorizer extends DocumentFilter {
             /*if (isQuoteDelimiter(content.substring(startOffset, startOffset + 1))) {
             startOffset = getQuoteToken(content, startOffset, endOffset);
             } else*/
-          
+
             if (Character.isWhitespace(content.charAt(startOffset))) {
                 startOffset++;
                 continue;
@@ -680,7 +685,9 @@ public class VarSyntaxColorizer extends DocumentFilter {
         VarSyntaxColorizer syntaxDocumentFilter = new VarSyntaxColorizer(edit, syntax);
         ((AbstractDocument) edit.getDocument()).setDocumentFilter(new DocumentFilterChain(syntaxDocumentFilter, blockDocumentFilter));
 
-        edit.setText("\nsdvsdfn$(a)sdffsd\n$(a)\n $a\nsdvsdfn@{$a}sdffsd\n @{$(a)}\n@{1.0}\n" + read("src/javax/swing/JXTextPane.java"));
+        String txt = read("src/javax/swing/JXTextPane.java");
+        txt = txt+txt+txt+txt+txt;
+        edit.setText("sdvsdfn$(a)sdffsd\n$(a)\n $a\nsdvsdfn@{$a}sdffsd\n @{$(a)}\n@{1.0}\n//R< toto\nesdfsdf\n" + txt);
 
         JFrame frame = new JFrame("Var Syntax Highlighting");
         frame.getContentPane().add(edit.getContainerWithLines());
