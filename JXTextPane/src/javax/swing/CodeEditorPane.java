@@ -20,6 +20,51 @@ import javax.swing.text.EditorKit;
  */
 public class CodeEditorPane extends LineNumbersTextPane {
 
+    /** Here is a way to handle regexp on keywords.*/
+    public static class RegExpKeywordMap extends HashMap {
+
+        public boolean keyAsRegexp = true;
+
+        @Override
+        public boolean containsKey(Object o) {
+            if (keyAsRegexp) {
+                for (Object regexp_key : super.keySet()) {
+                    if (o.toString().matches(regexp_key.toString())) {
+                        return true;
+                    }
+                }
+                return false;
+            } else {
+                for (Object regexp_key : super.keySet()) {
+                    if (o.toString().equals(regexp_key.toString())) {
+                        return true;
+                    }
+                }
+                return false;
+            }
+        }
+
+        @Override
+        public Object get(Object o) {
+            if (keyAsRegexp) {
+                for (Object regexp_key : super.keySet()) {
+                    if (o.toString().matches(regexp_key.toString())) {
+                        Object found = super.get(regexp_key.toString());
+                        return found;
+                    }
+                }
+                return null;
+            } else {
+                for (Object regexp_key : super.keySet()) {
+                    if (o.toString().equals(regexp_key.toString())) {
+                        Object found = super.get(regexp_key.toString());
+                        return found;
+                    }
+                }
+                return null;
+            }
+        }
+    }
     boolean init = false;
     private int vertical_line = -1;
     Color vertical_line_color = new Color(1.0f, 0.0f, 0.0f, 0.4f);

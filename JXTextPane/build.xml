@@ -45,7 +45,6 @@
     <target name="test" depends="compile">
         <javac classpath="${lib}/swingx-1.6.jar:junit4.jar" deprecation="true" target="1.6" srcdir="${test}" destdir="${build}" debug="true" />
         <java  jvm="java" classpath="${build}:${lib}/swingx-1.6.jar:junit4.jar" classname="javax.swing.JXTextPaneTest" fork="true"  >
-            <!--env key="Rserve_HOME" value="lib/MacOSX/x86/Rserve"/-->
             <assertions>
                 <enable/>
             </assertions>
