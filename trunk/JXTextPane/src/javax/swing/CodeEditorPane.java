@@ -67,10 +67,10 @@ public class CodeEditorPane extends LineNumbersTextPane {
     }
     boolean init = false;
     private int vertical_line = -1;
-    Color vertical_line_color = new Color(1.0f, 0.0f, 0.0f, 0.4f);
-    HashMap<String, String> help;
-    JPopupMenu completionMenu;
-    static int DEFAULT_FONT_SIZE = 10;
+    protected Color vertical_line_color = new Color(1.0f, 0.0f, 0.0f, 0.4f);
+    protected HashMap<String, String> help;
+    protected JPopupMenu completionMenu;
+    public static int DEFAULT_FONT_SIZE = 10;
 
     public CodeEditorPane() {
         super();
@@ -113,14 +113,14 @@ public class CodeEditorPane extends LineNumbersTextPane {
                     String before = txt.substring(0, getCaretPosition());
                     String after = txt.substring(getCaretPosition());
 
-                    LinkedList<KeyWordItem> items = buildCompletionMenu(before, after);
+                    LinkedList<JMenu> items = buildCompletionMenu(before, after);
                     if (items == null || items.size() == 0) {
                         return;
                     }
 
                     completionMenu.removeAll();
                     int n = 0;
-                    for (KeyWordItem k : items) {
+                    for (JMenu k : items) {
                         completionMenu.add(k);
                         n++;
                     }
@@ -152,7 +152,7 @@ public class CodeEditorPane extends LineNumbersTextPane {
 
     /** Method to override for more flexible (and clever:) completion strategy.
     This impl. is just default: suggest complete word with matching begining.*/
-    LinkedList<KeyWordItem> buildCompletionMenu(String beforeCaret, String afterCaret) {
+    LinkedList<JMenu> buildCompletionMenu(String beforeCaret, String afterCaret) {
         if (beforeCaret.length() == 0 || help == null || help.isEmpty()) {
             return null;
         }
@@ -174,7 +174,7 @@ public class CodeEditorPane extends LineNumbersTextPane {
             return null;
         }
 
-        LinkedList<KeyWordItem> items = new LinkedList<KeyWordItem>();
+        LinkedList<JMenu> items = new LinkedList<JMenu>();
         for (String k : help.keySet()) {
             if (k.startsWith(base)) {
                 items.add(new KeyWordItem(k, completionMenu, i));
