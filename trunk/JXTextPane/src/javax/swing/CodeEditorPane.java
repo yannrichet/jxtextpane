@@ -98,7 +98,7 @@ public class CodeEditorPane extends LineNumbersTextPane {
 
     @Override
     public String getSelectedText() {
-        if (blockDocumentFilter!=null && blockDocumentFilter.isBlockMode()) {
+        if (blockDocumentFilter != null && blockDocumentFilter.isBlockMode()) {
             return blockDocumentFilter.getSelectedBlock();
         } else {
             return super.getSelectedText();
@@ -108,7 +108,7 @@ public class CodeEditorPane extends LineNumbersTextPane {
     /** Method to override for more flexible (and clever:) completion strategy.
     This impl. is just default: suggest complete word with matching begining.*/
     LinkedList<KeyWordItem> buildCompletionMenu(String beforeCaret, String afterCaret) {
-        if (beforeCaret.length() == 0 || help==null || help.isEmpty()) {
+        if (beforeCaret.length() == 0 || help == null || help.isEmpty()) {
             return null;
         }
         String base = "";
