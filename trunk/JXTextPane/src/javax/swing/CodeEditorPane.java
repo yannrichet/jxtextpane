@@ -214,7 +214,7 @@ public class CodeEditorPane extends LineNumbersTextPane {
             setFont(completionMenu.getFont());
 
             if (help.get(name).length() > 0) {
-                add(new JMenuItem(help.get(name)));
+                add(buildHelpMenu(help.get(name)));
             }
 
             path[0] = parent;
@@ -238,6 +238,10 @@ public class CodeEditorPane extends LineNumbersTextPane {
             });
 
         }
+    }
+
+    public JComponent buildHelpMenu(String help) {
+        return new JMenuItem(help);
     }
 
     public void setVerticalLineAtPos(int pos) {
