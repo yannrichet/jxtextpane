@@ -124,7 +124,7 @@ public class BlockModeHandler extends DocumentFilter implements ClipboardOwner {
             }
 
             public void actionPerformed(ActionEvent e) {
-                System.err.println("COPY !");
+                //System.err.println("COPY !");
                 if (isBlockMode()) {
                     setClipboardContents(getSelectedBlock());
                 } else {
@@ -175,7 +175,7 @@ public class BlockModeHandler extends DocumentFilter implements ClipboardOwner {
             }
 
             public void actionPerformed(ActionEvent e) {
-                System.err.println("PASTE !");
+                //System.err.println("PASTE !");
                 if (isBlockMode()) {
                     pasteAsBlock(getClipboardContents());
                 } else {
@@ -218,7 +218,7 @@ public class BlockModeHandler extends DocumentFilter implements ClipboardOwner {
             }
 
             public void actionPerformed(ActionEvent e) {
-                System.err.println("CUT !");
+                //System.err.println("CUT !");
                 if (isBlockMode()) {
                     setClipboardContents(getSelectedBlock());
                     clearSelectedBlock();
