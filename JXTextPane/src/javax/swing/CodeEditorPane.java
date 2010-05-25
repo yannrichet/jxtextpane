@@ -66,7 +66,7 @@ public class CodeEditorPane extends LineNumbersTextPane {
         }
     }
     boolean init = false;
-    private int vertical_line = -1;
+    protected int vertical_line = -1;
     protected Color vertical_line_color = new Color(1.0f, 0.0f, 0.0f, 0.4f);
     protected HashMap<String, String> help;
     protected JPopupMenu completionMenu;
@@ -283,9 +283,9 @@ public class CodeEditorPane extends LineNumbersTextPane {
     protected EditorKit createDefaultEditorKit() {
         return new LineWrapEditorKit();
     }
-    int font_width = 0;
-    String font_width_ex = "a";
-    boolean reset_font_width = true;
+    protected int font_width = 0;
+    protected String font_width_ex = "a";
+    protected boolean reset_font_width = true;
 
     @Override
     public void setFont(Font font) {
