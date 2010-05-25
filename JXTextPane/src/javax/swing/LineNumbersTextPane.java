@@ -3,6 +3,7 @@ package javax.swing;
 import java.awt.Container;
 import java.awt.Graphics;
 import java.awt.Point;
+import java.awt.Rectangle;
 import java.awt.event.AdjustmentEvent;
 import java.awt.event.AdjustmentListener;
 import java.awt.event.KeyAdapter;
@@ -21,9 +22,17 @@ import javax.swing.text.JTextComponent;
 public class LineNumbersTextPane extends JXTextPane {
 
     private boolean displayLineNumbers = true;
-    JSplitPane jSplitPane1;
-    JScrollPane jScrollPane1;
+    protected JSplitPane jSplitPane1;
+    protected JScrollPane jScrollPane1;
     LineNumbersSidePane linenumbers;
+
+    @Override
+    public Rectangle modelToView(int pos) throws BadLocationException {
+        Rectangle offset = super.modelToView(pos);
+        offset.translate(-jScrollPane1.getViewport().getViewPosition().x, -jScrollPane1.getViewport().getViewPosition().y);
+        //System.err.println("modelToView "+super.modelToView(pos)+"\n -> \n"+offset);
+        return offset;
+    }
 
     public int getNumberOfLines() {
         return ((LineWrapEditorKit) getEditorKit()).number_of_lines;
