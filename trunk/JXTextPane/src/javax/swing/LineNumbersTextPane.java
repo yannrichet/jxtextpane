@@ -26,8 +26,7 @@ public class LineNumbersTextPane extends JXTextPane {
     protected JScrollPane jScrollPane1;
     LineNumbersSidePane linenumbers;
 
-    @Override
-    public Rectangle modelToView(int pos) throws BadLocationException {
+    public Rectangle modelToScrollView(int pos) throws BadLocationException {
         Rectangle offset = super.modelToView(pos);
         offset.translate(-jScrollPane1.getViewport().getViewPosition().x, -jScrollPane1.getViewport().getViewPosition().y);
         //System.err.println("modelToView "+super.modelToView(pos)+"\n -> \n"+offset);

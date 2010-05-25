@@ -126,7 +126,7 @@ public class CodeEditorPane extends LineNumbersTextPane {
                     }
                     if (n > 0) {
                         try {
-                            Rectangle r = modelToView(getCaretPosition());
+                            Rectangle r = modelToScrollView(getCaretPosition());
                             completionMenu.show(getParent(), (int) r.getX(), (int) r.getY() + getFont().getSize() + 2);
                             MenuSelectionManager.defaultManager().setSelectedPath(((KeyWordItem) completionMenu.getComponents()[0]).path);
                             completionMenu.requestFocus();
