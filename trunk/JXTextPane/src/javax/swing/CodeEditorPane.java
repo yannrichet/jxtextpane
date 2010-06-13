@@ -71,6 +71,8 @@ public class CodeEditorPane extends LineNumbersTextPane {
     protected HashMap<String, String> help;
     protected JPopupMenu completionMenu;
     public static int DEFAULT_FONT_SIZE = 10;
+    LinkedList<KeyWordItem> visible_completion_keywords;
+    KeyAdapter keyAdapter;
 
     public CodeEditorPane() {
         super();
@@ -97,30 +99,64 @@ public class CodeEditorPane extends LineNumbersTextPane {
                     KeyWordItem selected = (KeyWordItem) el[el.length - 1];
                     int sel = completionMenu.getComponentIndex(selected);
                     MenuSelectionManager.defaultManager().setSelectedPath(((KeyWordItem) completionMenu.getComponent((sel + 1) % completionMenu.getComponentCount())).path);
-
+                } else {
+                    /*if (completionMenu.isVisible() && Character.isLetterOrDigit(e.getKeyChar())) {
+                    System.err.println("" + e.getKeyChar());
+                    LinkedList<KeyWordItem> toremove = new LinkedList<KeyWordItem>();
+                    for (KeyWordItem keyWordItem : visible_completion_keywords) {
+                    if (!keyWordItem.name.startsWith("" + e.getKeyChar(), keyWordItem.alreadywriten - 1)) {
+                    toremove.add(keyWordItem);
+                    }
+                    }
+                    System.err.println("To remove:");
+                    for (KeyWordItem keyWordItem : toremove) {
+                    System.err.println(keyWordItem.name);
+                    visible_completion_keywords.remove(keyWordItem);
+                    completionMenu.remove(keyWordItem);
+                    completionMenu.updateUI();
+                    }
+                    }*/
+                    if (e.getKeyCode() == KeyEvent.VK_BACK_SPACE) {
+                        if (isEditable()) {
+                            try {
+                                getDocument().remove(getCaretPosition() - 1, 1);
+                            } catch (BadLocationException ex) {
+                                ex.printStackTrace();
+                            }
+                        }
+                        keyAdapter.keyPressed(e);//TODO rebuild all completionMenu, which may be optimized...
+                    } else if (Character.isLetterOrDigit(e.getKeyCode())) {
+                        if (isEditable()) {
+                            try {
+                                getDocument().insertString(getCaretPosition(), "" + e.getKeyChar(), null);
+                            } catch (BadLocationException ex) {
+                                ex.printStackTrace();
+                            }
+                        }
+                        keyAdapter.keyPressed(e);//TODO rebuild all completionMenu, which may be optimized...
+                    }
                 }
-                super.keyPressed(e);
             }
         });
 
-        addKeyListener(new KeyAdapter() {
+        keyAdapter = new KeyAdapter() {
 
             @Override
             public void keyPressed(KeyEvent e) {
                 super.keyPressed(e);
-                if (isCompletionKeyEvent(e)) {
+                if (isCompletionKeyEvent(e) || completionMenu.isVisible()) {
                     String txt = getText();
                     String before = txt.substring(0, getCaretPosition());
                     String after = txt.substring(getCaretPosition());
 
-                    LinkedList<JMenu> items = buildCompletionMenu(before, after);
-                    if (items == null || items.size() == 0) {
+                    visible_completion_keywords = buildCompletionMenu(before, after);
+                    if (visible_completion_keywords == null || visible_completion_keywords.size() == 0) {
                         return;
                     }
 
                     completionMenu.removeAll();
                     int n = 0;
-                    for (JMenu k : items) {
+                    for (KeyWordItem k : visible_completion_keywords) {
                         completionMenu.add(k);
                         n++;
                     }
@@ -138,7 +174,8 @@ public class CodeEditorPane extends LineNumbersTextPane {
                     }
                 }
             }
-        });
+        };
+        addKeyListener(keyAdapter);
     }
 
     @Override
@@ -152,7 +189,7 @@ public class CodeEditorPane extends LineNumbersTextPane {
 
     /** Method to override for more flexible (and clever:) completion strategy.
     This impl. is just default: suggest complete word with matching begining.*/
-    LinkedList<JMenu> buildCompletionMenu(String beforeCaret, String afterCaret) {
+    LinkedList<KeyWordItem> buildCompletionMenu(String beforeCaret, String afterCaret) {
         if (beforeCaret.length() == 0 || help == null || help.isEmpty()) {
             return null;
         }
@@ -174,13 +211,13 @@ public class CodeEditorPane extends LineNumbersTextPane {
             return null;
         }
 
-        LinkedList<JMenu> items = new LinkedList<JMenu>();
+        LinkedList<KeyWordItem> newitems = new LinkedList<KeyWordItem>();
         for (String k : help.keySet()) {
             if (k.startsWith(base)) {
-                items.add(new KeyWordItem(k, completionMenu, i));
+                newitems.add(new KeyWordItem(k, completionMenu, i));
             }
         }
-        return items;
+        return newitems;
     }
 
     /**Method to override for changing completion key*/
@@ -237,6 +274,11 @@ public class CodeEditorPane extends LineNumbersTextPane {
                 }
             });
 
+        }
+
+        @Override
+        public String toString() {
+            return "[" + name.substring(0, alreadywriten) + "]" + name.substring(alreadywriten) + "\n" + super.toString();
         }
     }
 
