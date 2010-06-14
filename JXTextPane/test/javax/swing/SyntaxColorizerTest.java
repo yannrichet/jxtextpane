@@ -81,7 +81,7 @@ public class SyntaxColorizerTest {
         syntax.put("while", Color.GREEN);
         syntax.put("\\$(\\w+)", Color.YELLOW);
 
-        final JXTextPane edit = new JXTextPane();
+        final CodeEditorPane edit = new CodeEditorPane();
 
         JButton button = new JButton("Load ...");
         button.addActionListener(new ActionListener() {
