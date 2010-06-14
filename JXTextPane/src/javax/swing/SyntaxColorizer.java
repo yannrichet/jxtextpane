@@ -488,7 +488,7 @@ class SyntaxColorizer extends DocumentFilter {
      *  Override for other languages
      */
     protected boolean isDelimiter(String character) {
-        String operands = ";:{}()[]+-/%<=>!&|^~*";
+        String operands = ";:{}()[]+-/%<=>!&|^~*.";
 
         if (Character.isWhitespace(character.charAt(0))
                 || operands.indexOf(character) != -1) {
