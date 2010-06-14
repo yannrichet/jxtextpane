@@ -30,6 +30,7 @@ public class SyntaxHTMLWriter extends AbstractWriter {
         src = src.replace("'", "&apos;");
         src = src.replace(">", "&gt;");
         src = src.replace("<", "&lt;");
+        src = src.replace(" ", "&nbsp;");
         return src.replace("\n", "<br/>");
     }
     /**
@@ -205,7 +206,7 @@ public class SyntaxHTMLWriter extends AbstractWriter {
         } else {
             write(NEWLINE);
         }
-        writeEndTag("</p>");
+        //writeEndTag("</p>");
     }
 
     /**
@@ -218,13 +219,13 @@ public class SyntaxHTMLWriter extends AbstractWriter {
      * @exception IOException on any I/O error
      */
     protected void writeStartParagraph(Element elem) throws IOException {
-        AttributeSet attr = elem.getAttributes();
+        /*AttributeSet attr = elem.getAttributes();
         Object resolveAttr = attr.getAttribute(StyleConstants.ResolveAttribute);
-        if (resolveAttr instanceof StyleContext.NamedStyle) {
+        /*if (resolveAttr instanceof StyleContext.NamedStyle) {
             writeStartTag("<p class=" + mapStyleName(((StyleContext.NamedStyle) resolveAttr).getName()) + ">");
         } else {
             writeStartTag("<p>");
-        }
+        }*/
     }
 
     /**
