@@ -6,7 +6,7 @@ import javax.swing.event.UndoableEditListener;
 import javax.swing.text.*;
 
 /**This DocumentFilter supports syntax dependant colorization. RegExp are available if RegExpHashMap is used to give KeyWords*/
-class SyntaxColorizer extends DocumentFilter {
+public class SyntaxColorizer extends DocumentFilter {
 
     private StyledDocument doc;
     private Element rootElement;
@@ -17,6 +17,7 @@ class SyntaxColorizer extends DocumentFilter {
     private HashMap<String, Color> keywords;
     private HashMap<Color, MutableAttributeSet> colors;
     UndoableEditListener undo;
+    public final static String ALL_OPERANDS = ";:.!?{}()[]<>+-*/=\\%&|^~$@\"'`#";
 
     public SyntaxColorizer(JXTextPane component, HashMap<String, Color> keywords) {
         this.doc = component.getStyledDocument();
@@ -363,7 +364,7 @@ class SyntaxColorizer extends DocumentFilter {
         while (startOffset <= endOffset) {
             //  skip the delimiters to find the start of a new token
 
-            while (isDelimiter(content.substring(startOffset, startOffset + 1))) {
+            while (isDelimiter(content.charAt(startOffset))) {
                 if (startOffset < endOffset) {
                     startOffset++;
                 } else {
@@ -422,7 +423,7 @@ class SyntaxColorizer extends DocumentFilter {
         int endOfToken = startOffset + 1;
 
         while (endOfToken <= endOffset) {
-            if (isDelimiter(content.substring(endOfToken, endOfToken + 1))) {
+            if (isDelimiter(content.charAt(endOfToken))) {
                 break;
             }
 
@@ -487,10 +488,9 @@ class SyntaxColorizer extends DocumentFilter {
     /*
      *  Override for other languages
      */
-    protected boolean isDelimiter(String character) {
-        String operands = ";:{}()[]+-/%<=>!&|^~*.";
-
-        if (Character.isWhitespace(character.charAt(0))
+    String operands = ALL_OPERANDS;
+    protected boolean isDelimiter(char character) {
+        if (Character.isWhitespace(character)
                 || operands.indexOf(character) != -1) {
             return true;
         } else {
