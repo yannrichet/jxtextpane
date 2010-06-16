@@ -189,7 +189,7 @@ public class CodeEditorPane extends LineNumbersTextPane {
 
     /** Method to override for more flexible (and clever:) completion strategy.
     This impl. is just default: suggest complete word with matching begining.*/
-    LinkedList<KeyWordItem> buildCompletionMenu(String beforeCaret, String afterCaret) {
+    public LinkedList<KeyWordItem> buildCompletionMenu(String beforeCaret, String afterCaret) {
         if (beforeCaret.length() == 0 || help == null || help.isEmpty()) {
             return null;
         }
@@ -197,7 +197,7 @@ public class CodeEditorPane extends LineNumbersTextPane {
         int i = 1;
         char c;
         c = beforeCaret.charAt(beforeCaret.length() - i);
-        while (Character.isLetterOrDigit(c)) {
+        while (!syntaxDocumentFilter.isDelimiter(c)) {
             base = c + base;
             i++;
             if (((getCaretPosition() - i) >= 0)) {
@@ -225,7 +225,7 @@ public class CodeEditorPane extends LineNumbersTextPane {
         return e.isControlDown() && e.getKeyCode() == KeyEvent.VK_SPACE;
     }
 
-    class KeyWordItem extends JMenu {//TODO: help content may be displayed automatically when this menu is selected...
+    public class KeyWordItem extends JMenu {//TODO: help content may be displayed automatically when this menu is selected...
 
         String name;
         MenuElement[] path = new MenuElement[2];
