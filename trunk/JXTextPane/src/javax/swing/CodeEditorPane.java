@@ -298,7 +298,7 @@ public class CodeEditorPane extends LineNumbersTextPane {
 
         protected void createHelpMenu(String name, HashMap<String, String> dictionnary) {
             if (dictionnary != null && name != null) {
-                if (dictionnary.get(name).length() > 0) {
+                if (dictionnary.get(name) != null && dictionnary.get(name).length() > 0) {
                     add(buildHelpMenu(dictionnary.get(name)));
                 }
             }
