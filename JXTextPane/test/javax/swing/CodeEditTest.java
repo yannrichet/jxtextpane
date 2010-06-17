@@ -31,9 +31,19 @@ public class CodeEditTest {
         edit.setKeywordColor(syntax);
 
         HashMap<String, String> help = new HashMap<String, String>();
-        help.put("boolean", "???");
+        help.put("boolea", "???");
         help.put("booleeeaaa", "???");
         help.put("booleeeaaannn", "");
+        help.put("abstract", "abstract");
+        help.put("boolean", "boolean");
+        help.put("break", "break");
+        help.put("byte","byte");
+        help.put("byvalue", "byvalue");
+        help.put("case","case");
+        help.put("cast","cast");
+        help.put("catch","catch");
+        help.put("zz","zzZZzz");
+
         edit.setKeywordHelp(help);
 
         edit.setText(read("src/javax/swing/JXTextPane.java"));

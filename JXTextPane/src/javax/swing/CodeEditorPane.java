@@ -7,8 +7,10 @@ import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.List;
 import javax.swing.event.MenuKeyEvent;
 import javax.swing.event.MenuKeyListener;
 import javax.swing.text.AbstractDocument;
@@ -72,6 +74,7 @@ public class CodeEditorPane extends LineNumbersTextPane {
     protected JPopupMenu completionMenu;
     public static int DEFAULT_FONT_SIZE = 10;
     KeyAdapter keyAdapter;
+    int maxCompletionMenuItems = 10;
 
     public CodeEditorPane() {
         super();
@@ -89,6 +92,7 @@ public class CodeEditorPane extends LineNumbersTextPane {
 
         completionMenu.setBackground(Color.WHITE);
         completionMenu.setFont(getFont());
+
         completionMenu.addKeyListener(new KeyAdapter() {
 
             @Override
@@ -140,6 +144,33 @@ public class CodeEditorPane extends LineNumbersTextPane {
 
         keyAdapter = new KeyAdapter() {
 
+            void fillCompletionMenu(final LinkedList<KeyWordItem> items, final int from) {
+                completionMenu.setVisible(false);
+                completionMenu.removeAll();
+                if (from > 0) {
+                    completionMenu.add(new JMenuItem(new AbstractAction("...") {
+
+                        public void actionPerformed(ActionEvent e) {
+                            fillCompletionMenu(items, Math.min(0, from - maxCompletionMenuItems));
+                        }
+                    }));
+                }
+                int i = 0;
+                for (i = from; i < Math.min(from + maxCompletionMenuItems, items.size()); i++) {
+                    KeyWordItem k = items.get(i);
+                    completionMenu.add(k);
+                }
+                if (i < items.size()) {
+                    completionMenu.add(new JMenuItem(new AbstractAction("...") {
+
+                        public void actionPerformed(ActionEvent e) {
+                            fillCompletionMenu(items, from + maxCompletionMenuItems);
+                        }
+                    }));
+                }
+                completionMenu.setVisible(true);
+            }
+
             @Override
             public void keyPressed(KeyEvent e) {
                 super.keyPressed(e);
@@ -149,17 +180,10 @@ public class CodeEditorPane extends LineNumbersTextPane {
                     String after = txt.substring(getCaretPosition());
 
                     LinkedList<KeyWordItem> visible_completion_keywords = buildCompletionMenu(before, after);
-                    /*if (visible_completion_keywords == null || visible_completion_keywords.size() == 0) {
-                    return;
-                    }*/
 
-                    completionMenu.removeAll();
-                    int n = 0;
-                    for (KeyWordItem k : visible_completion_keywords) {
-                        completionMenu.add(k);
-                        n++;
-                    }
-                    if (n > 0) {
+                    fillCompletionMenu(visible_completion_keywords, 0);
+
+                    if (visible_completion_keywords.size() > 0) {
                         try {
                             Rectangle r = modelToScrollView(getCaretPosition());
                             completionMenu.show(getParent(), (int) r.getX(), (int) r.getY() + getFont().getSize() + 2);
@@ -214,6 +238,7 @@ public class CodeEditorPane extends LineNumbersTextPane {
                 newitems.add(new KeyWordItem(k, help, completionMenu, i));
             }
         }
+        Collections.sort(newitems);
         return newitems;
     }
 
@@ -222,7 +247,7 @@ public class CodeEditorPane extends LineNumbersTextPane {
         return e.isControlDown() && e.getKeyCode() == KeyEvent.VK_SPACE;
     }
 
-    public class KeyWordItem extends JMenu {//TODO: help content may be displayed automatically when this menu is selected...
+    public class KeyWordItem extends JMenu implements Comparable {//TODO: help content may be displayed automatically when this menu is selected...
 
         String name;
         MenuElement[] path = new MenuElement[2];
@@ -280,6 +305,10 @@ public class CodeEditorPane extends LineNumbersTextPane {
         @Override
         public String toString() {
             return "[" + name.substring(0, alreadywriten) + "]" + name.substring(alreadywriten) + "\n" + super.toString();
+        }
+
+        public int compareTo(Object o) {
+            return name.compareTo(((KeyWordItem) o).name);
         }
     }
 
