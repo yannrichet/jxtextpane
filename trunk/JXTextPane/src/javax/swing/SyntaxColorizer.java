@@ -127,6 +127,12 @@ public class SyntaxColorizer extends DocumentFilter {
             } else if (str.charAt(0) == '[') {
                 str = "[]";
                 caret_offset = -1;
+            } else if (str.charAt(0) == '\'') {
+                str = "''";
+                caret_offset = -1;
+            } else if (str.charAt(0) == '"') {
+                str = "\"\"";
+                caret_offset = -1;
             }
         }
 
