@@ -17,9 +17,11 @@ public class SyntaxColorizer extends DocumentFilter {
     private HashMap<String, Color> keywords;
     private HashMap<Color, MutableAttributeSet> colors;
     UndoableEditListener undo;
+    JXTextPane component;
     public final static String ALL_OPERANDS = ";:.!?{}()[]<>+-*/=\\%&|^~$@\"'`#";
 
     public SyntaxColorizer(JXTextPane component, HashMap<String, Color> keywords) {
+        this.component = component;
         this.doc = component.getStyledDocument();
         this.undo = component.getUndoableEditListener();
 
@@ -111,9 +113,22 @@ public class SyntaxColorizer extends DocumentFilter {
 
     @Override
     public void insertString(DocumentFilter.FilterBypass b, int offset, String str, AttributeSet a) throws BadLocationException {
-        /*if (str.equals("{")) {
-        str = addMatchingBrace(offset);
-        }*/
+        int caret_offset = 0;
+        if (str.length() == 1) {//to avoid when str does not come from user: it crashes if 4096 buffer starts with a '('
+            if (str.charAt(0) == '{') {
+                str = "{}";
+                caret_offset = -1;
+            } else if (str.charAt(0) == '(') {
+                str = "()";
+                caret_offset = -1;
+            } else if (str.charAt(0) == '<') {
+                str = "<>";
+                caret_offset = -1;
+            } else if (str.charAt(0) == '[') {
+                str = "[]";
+                caret_offset = -1;
+            }
+        }
 
         b.insertString(offset, str, a);
         if (undo != null) {
@@ -122,6 +137,10 @@ public class SyntaxColorizer extends DocumentFilter {
             doc.addUndoableEditListener(undo);
         } else {
             processChangedLines(offset, str.length());
+        }
+
+        if (caret_offset != 0) {
+            component.setCaretPosition(component.getCaretPosition() + caret_offset);
         }
     }
 
@@ -489,6 +508,7 @@ public class SyntaxColorizer extends DocumentFilter {
      *  Override for other languages
      */
     String operands = ALL_OPERANDS;
+
     protected boolean isDelimiter(char character) {
         if (Character.isWhitespace(character)
                 || operands.indexOf(character) != -1) {

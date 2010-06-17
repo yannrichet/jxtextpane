@@ -82,6 +82,7 @@ public class SyntaxColorizerTest {
         syntax.put("\\$(\\w+)", Color.YELLOW);
 
         final CodeEditorPane edit = new CodeEditorPane();
+        edit.setKeywordColor(syntax);
 
         JButton button = new JButton("Load ...");
         button.addActionListener(new ActionListener() {
@@ -105,8 +106,6 @@ public class SyntaxColorizerTest {
 
             }
         });
-
-        ((AbstractDocument) edit.getDocument()).setDocumentFilter(new SyntaxColorizer(edit, syntax));
 
         JFrame frame = new JFrame("Syntax Highlighting");
         frame.getContentPane().add(new JScrollPane(edit));
