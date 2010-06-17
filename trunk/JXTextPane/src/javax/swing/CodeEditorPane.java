@@ -71,7 +71,6 @@ public class CodeEditorPane extends LineNumbersTextPane {
     protected HashMap<String, String> help;
     protected JPopupMenu completionMenu;
     public static int DEFAULT_FONT_SIZE = 10;
-    LinkedList<KeyWordItem> visible_completion_keywords;
     KeyAdapter keyAdapter;
 
     public CodeEditorPane() {
@@ -149,10 +148,10 @@ public class CodeEditorPane extends LineNumbersTextPane {
                     String before = txt.substring(0, getCaretPosition());
                     String after = txt.substring(getCaretPosition());
 
-                    visible_completion_keywords = buildCompletionMenu(before, after);
-                    if (visible_completion_keywords == null || visible_completion_keywords.size() == 0) {
-                        return;
-                    }
+                    LinkedList<KeyWordItem> visible_completion_keywords = buildCompletionMenu(before, after);
+                    /*if (visible_completion_keywords == null || visible_completion_keywords.size() == 0) {
+                    return;
+                    }*/
 
                     completionMenu.removeAll();
                     int n = 0;
@@ -214,7 +213,7 @@ public class CodeEditorPane extends LineNumbersTextPane {
         LinkedList<KeyWordItem> newitems = new LinkedList<KeyWordItem>();
         for (String k : help.keySet()) {
             if (k.startsWith(base)) {
-                newitems.add(new KeyWordItem(k, completionMenu, i));
+                newitems.add(new KeyWordItem(k, help, completionMenu, i));
             }
         }
         return newitems;
@@ -231,7 +230,7 @@ public class CodeEditorPane extends LineNumbersTextPane {
         MenuElement[] path = new MenuElement[2];
         int alreadywriten;
 
-        public KeyWordItem(final String name, JPopupMenu parent, final int alreadywriten) {
+        public KeyWordItem(final String name, HashMap<String, String> dictionnary, JPopupMenu parent, final int alreadywriten) {
             super(new AbstractAction(name) {
 
                 public void actionPerformed(ActionEvent e) {
@@ -250,9 +249,7 @@ public class CodeEditorPane extends LineNumbersTextPane {
             setText(name);
             setFont(completionMenu.getFont());
 
-            if (help.get(name).length() > 0) {
-                add(buildHelpMenu(help.get(name)));
-            }
+            createHelpMenu(name, dictionnary);
 
             path[0] = parent;
             path[1] = this;
@@ -274,6 +271,12 @@ public class CodeEditorPane extends LineNumbersTextPane {
                 }
             });
 
+        }
+
+        protected void createHelpMenu(String name, HashMap<String, String> dictionnary) {
+            if (dictionnary.get(name).length() > 0) {
+                add(buildHelpMenu(dictionnary.get(name)));
+            }
         }
 
         @Override
