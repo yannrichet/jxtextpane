@@ -145,6 +145,7 @@ public class CodeEditorPane extends LineNumbersTextPane {
         keyAdapter = new KeyAdapter() {
 
             void fillCompletionMenu(final LinkedList<KeyWordItem> items, final int from) {
+               if (items==null) return;
                 completionMenu.setVisible(false);
                 completionMenu.removeAll();
                 if (from > 0) {
