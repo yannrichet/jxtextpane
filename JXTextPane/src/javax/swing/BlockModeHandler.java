@@ -30,7 +30,7 @@ public class BlockModeHandler extends DocumentFilter implements ClipboardOwner {
     JTextComponent component;
     Caret normal;
     BlockModeCaret block;
-    Color block_color = new Color(0.3f, 1f, 0.3f, 0.4f);
+    Color block_color = new Color(0.3f, .8f, 0.3f, 0.4f);
 
     public BlockModeHandler(JTextComponent component) {
         setTextComponent(component);
@@ -54,7 +54,7 @@ public class BlockModeHandler extends DocumentFilter implements ClipboardOwner {
 
             @Override
             public void keyPressed(KeyEvent e) {
-                if (e.isAltDown()) {
+                if (isBlockModeKeyEvent(e)) {
                     setBlockMode(!isBlockMode());
                     if (isBlockMode()) {
                         component.getCaret().setSelectionVisible(false);
@@ -92,6 +92,11 @@ public class BlockModeHandler extends DocumentFilter implements ClipboardOwner {
                 super.keyPressed(e);
             }
         });
+    }
+
+    /**Method to override for changing completion key*/
+    boolean isBlockModeKeyEvent(KeyEvent e) {
+        return e.isAltDown() && !e.isAltGraphDown() && !e.isControlDown();
     }
 
     void resetCopy() {
@@ -137,13 +142,13 @@ public class BlockModeHandler extends DocumentFilter implements ClipboardOwner {
         //printActions();
     }
 
-    void printActions() {
+    /*void printActions() {
         System.err.println("ACTIONS:");
         for (Object object : component.getActionMap().keys()) {
             System.err.println(object + " " + component.getActionMap().get(object));
         }
         System.err.println("=======================");
-    }
+    }*/
 
     void resetPaste() {
         final Action paste = component.getActionMap().get("paste");
