@@ -37,12 +37,24 @@ public class CodeEditTest {
         help.put("abstract", "abstract");
         help.put("boolean", "boolean");
         help.put("break", "break");
-        help.put("byte","byte");
+        help.put("byte", "byte");
         help.put("byvalue", "byvalue");
-        help.put("case","case");
-        help.put("cast","cast");
-        help.put("catch","catch");
-        help.put("zz","zzZZzz");
+        help.put("case", "case");
+        help.put("cast", "cast");
+        help.put("catch", "catch");
+        help.put("zz", "zzZZzz");
+        help.put("a", "a");
+        help.put("b", "b");
+        help.put("c", "c");
+        help.put("d", "d");
+        help.put("e", "e");
+        help.put("f", "f");
+        help.put("g", "g");
+        help.put("h", "h");
+        help.put("i", "i");
+        help.put("j", "j");
+        help.put("k", "k");
+        help.put("l", "l");
 
         edit.setKeywordHelp(help);
 

@@ -10,7 +10,6 @@ import java.awt.event.KeyEvent;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
-import java.util.List;
 import javax.swing.event.MenuKeyEvent;
 import javax.swing.event.MenuKeyListener;
 import javax.swing.text.AbstractDocument;
@@ -152,7 +151,7 @@ public class CodeEditorPane extends LineNumbersTextPane {
                     completionMenu.add(new JMenuItem(new AbstractAction("...") {
 
                         public void actionPerformed(ActionEvent e) {
-                            fillCompletionMenu(items, Math.min(0, from - maxCompletionMenuItems));
+                            fillCompletionMenu(items, Math.max(0, from - maxCompletionMenuItems));
                         }
                     }));
                 }

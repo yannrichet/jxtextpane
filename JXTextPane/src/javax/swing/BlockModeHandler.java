@@ -94,7 +94,7 @@ public class BlockModeHandler extends DocumentFilter implements ClipboardOwner {
         });
     }
 
-    /**Method to override for changing completion key*/
+    /**Method to override for changing block mode key*/
     boolean isBlockModeKeyEvent(KeyEvent e) {
         return e.isAltDown() && !e.isAltGraphDown() && !e.isControlDown();
     }
