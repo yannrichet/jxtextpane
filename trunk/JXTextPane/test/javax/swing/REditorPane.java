@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package javax.swing;
 
 import java.awt.Color;
@@ -26,11 +22,11 @@ import javax.swing.text.html.StyleSheet;
  */
 public class REditorPane extends CodeEditorPane {
 
-    public static final String HTTP_BASE = "http://stat.ethz.ch/R-manual/R-patched/library/base/html/";
+    public static String HTTP_BASE = "http://stat.ethz.ch/R-manual/R-patched/library/base/html/";
     public static HashMap<String, Color> keyword_color = new HashMap<String, Color>();
     public static HashMap<String, String> help_link = new HashMap<String, String>();
 
-    public static String readURL(String urlstr) {
+    private static String readURL(String urlstr) {
 
         BufferedReader in = null;
         StringBuffer str = new StringBuffer();
@@ -64,7 +60,7 @@ public class REditorPane extends CodeEditorPane {
         return str.toString();
     }
 
-    static public void buildCompletionMap() {
+    static void buildCompletionMap() {
         if (!help_link.isEmpty()) {
             return;
         }
@@ -152,7 +148,7 @@ public class REditorPane extends CodeEditorPane {
         return content;
     }
 
-    class RDocPane extends JEditorPane implements HyperlinkListener {
+    static class RDocPane extends JEditorPane implements HyperlinkListener {
 
         public RDocPane(String text) {
             setEditable(false);
