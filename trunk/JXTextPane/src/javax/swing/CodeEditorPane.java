@@ -183,7 +183,7 @@ public class CodeEditorPane extends LineNumbersTextPane {
 
                     fillCompletionMenu(visible_completion_keywords, 0);
 
-                    if (visible_completion_keywords.size() > 0) {
+                    if (visible_completion_keywords!=null && visible_completion_keywords.size() > 0) {
                         try {
                             Rectangle r = modelToScrollView(getCaretPosition());
                             completionMenu.show(getParent(), (int) r.getX(), (int) r.getY() + getFont().getSize() + 2);
