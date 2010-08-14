@@ -194,7 +194,7 @@ public class LineNumbersTextPane extends JXTextPane {
             }
 
             for (int line = startline, y = starting_y; line <= endline; y += fontHeight, line++) {
-                g.drawString(Integer.toString(line), 0, y);
+                g.drawString(" "+Integer.toString(line), 0, y);
             }
 
         }

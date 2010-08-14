@@ -17,7 +17,7 @@ import javax.swing.text.html.HTMLEditorKit;
 import javax.swing.text.html.StyleSheet;
 
 /**
- *
+ * This is a demonstration instance of CodeEditorPane for R programing language.
  * @author richet
  */
 public class REditorPane extends CodeEditorPane {
