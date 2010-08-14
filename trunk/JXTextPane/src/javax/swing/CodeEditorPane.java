@@ -348,8 +348,8 @@ public class CodeEditorPane extends LineNumbersTextPane {
     public void setVerticalLineAtPos(int pos) {
         this.vertical_line = pos;
     }
-    private Highlighter.HighlightPainter painter = new ComponentWidthHighlightPainter(caret_line_color);
-    private Object highlight;
+    public Highlighter.HighlightPainter painter = new ComponentWidthHighlightPainter(caret_line_color);
+    public Object highlight;
 
     public class ComponentWidthHighlightPainter extends LayeredHighlighter.LayerPainter {
 
@@ -369,14 +369,11 @@ public class CodeEditorPane extends LineNumbersTextPane {
             } else {
                 alloc = bounds.getBounds();
             }
-            Rectangle wide_alloc = (Rectangle) alloc.clone();
-            if (wide_alloc.x == 3) {
-                wide_alloc.width = getVisibleRect().width;
-
-                //System.err.println(wide_alloc.x + "," + wide_alloc.y + "," + wide_alloc.width + "," + wide_alloc.height);
-                g.fillRect(wide_alloc.x, wide_alloc.y, wide_alloc.width, wide_alloc.height);
+            if (alloc.x <= 5) {// To only apply on layer applied to full line
+                alloc.width = getVisibleRect().width;
+                g.fillRect(alloc.x, alloc.y, alloc.width, alloc.height);
             }
-            return wide_alloc;
+            return alloc;
         }
         protected Color color; // The color for the underline
     }
