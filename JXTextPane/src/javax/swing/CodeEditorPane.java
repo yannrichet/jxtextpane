@@ -4,17 +4,26 @@ import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Rectangle;
+import java.awt.Shape;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
+import javax.swing.event.CaretEvent;
+import javax.swing.event.CaretListener;
 import javax.swing.event.MenuKeyEvent;
 import javax.swing.event.MenuKeyListener;
 import javax.swing.text.AbstractDocument;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.EditorKit;
+import javax.swing.text.Element;
+import javax.swing.text.Highlighter;
+import javax.swing.text.JTextComponent;
+import javax.swing.text.LayeredHighlighter;
+import javax.swing.text.Utilities;
+import javax.swing.text.View;
 
 /** Top level class to handle code syntax and advanced edition features.
  * @author richet
@@ -68,12 +77,26 @@ public class CodeEditorPane extends LineNumbersTextPane {
     }
     boolean init = false;
     protected int vertical_line = -1;
+    protected int caret_line_start = -1;
+    protected int caret_line_end = -1;
     protected Color vertical_line_color = new Color(1.0f, 0.0f, 0.0f, 0.4f);
+    protected Color caret_line_color = new Color(1.0f, 0.0f, 0.0f, 0.1f);
     protected HashMap<String, String> help;
     protected JPopupMenu completionMenu;
     public static int DEFAULT_FONT_SIZE = 10;
     KeyAdapter keyAdapter;
     int maxCompletionMenuItems = 10;
+
+    public class CurrentLineHighlighter implements CaretListener {
+
+        public void caretUpdate(CaretEvent e) {
+            JTextComponent comp = (JTextComponent) e.getSource();
+            int pos = comp.getCaretPosition();
+            Element elem = Utilities.getParagraphElement(comp, pos);
+            caret_line_start = elem.getStartOffset();
+            caret_line_end = elem.getEndOffset();
+        }
+    }
 
     public CodeEditorPane() {
         super();
@@ -144,7 +167,9 @@ public class CodeEditorPane extends LineNumbersTextPane {
         keyAdapter = new KeyAdapter() {
 
             void fillCompletionMenu(final LinkedList<KeyWordItem> items, final int from) {
-               if (items==null) return;
+                if (items == null) {
+                    return;
+                }
                 completionMenu.setVisible(false);
                 completionMenu.removeAll();
                 if (from > 0) {
@@ -183,7 +208,7 @@ public class CodeEditorPane extends LineNumbersTextPane {
 
                     fillCompletionMenu(visible_completion_keywords, 0);
 
-                    if (visible_completion_keywords!=null && visible_completion_keywords.size() > 0) {
+                    if (visible_completion_keywords != null && visible_completion_keywords.size() > 0) {
                         try {
                             Rectangle r = modelToScrollView(getCaretPosition());
                             completionMenu.show(getParent(), (int) r.getX(), (int) r.getY() + getFont().getSize() + 2);
@@ -199,6 +224,8 @@ public class CodeEditorPane extends LineNumbersTextPane {
             }
         };
         addKeyListener(keyAdapter);
+
+        addCaretListener(new CurrentLineHighlighter());
     }
 
     @Override
@@ -321,6 +348,38 @@ public class CodeEditorPane extends LineNumbersTextPane {
     public void setVerticalLineAtPos(int pos) {
         this.vertical_line = pos;
     }
+    private Highlighter.HighlightPainter painter = new ComponentWidthHighlightPainter(caret_line_color);
+    private Object highlight;
+
+    public class ComponentWidthHighlightPainter extends LayeredHighlighter.LayerPainter {
+
+        public ComponentWidthHighlightPainter(Color c) {
+            color = c;
+        }
+
+        public void paint(Graphics g, int offs0, int offs1, Shape bounds, JTextComponent c) {
+            // Do nothing: this method will never be called
+        }
+
+        public Shape paintLayer(Graphics g, int offs0, int offs1, Shape bounds, JTextComponent c, View view) {
+            g.setColor(color);
+            Rectangle alloc = null;
+            if (bounds instanceof Rectangle) {
+                alloc = (Rectangle) bounds;
+            } else {
+                alloc = bounds.getBounds();
+            }
+            Rectangle wide_alloc = (Rectangle) alloc.clone();
+            if (wide_alloc.x == 3) {
+                wide_alloc.width = getVisibleRect().width;
+
+                //System.err.println(wide_alloc.x + "," + wide_alloc.y + "," + wide_alloc.width + "," + wide_alloc.height);
+                g.fillRect(wide_alloc.x, wide_alloc.y, wide_alloc.width, wide_alloc.height);
+            }
+            return wide_alloc;
+        }
+        protected Color color; // The color for the underline
+    }
 
     @Override
     public void paint(Graphics g) {
@@ -333,6 +392,21 @@ public class CodeEditorPane extends LineNumbersTextPane {
             int xline = font_width * vertical_line + 2;
             g.setColor(vertical_line_color);
             g.drawLine(getVisibleRect().x + xline, getVisibleRect().y, getVisibleRect().x + xline, getVisibleRect().y + getVisibleRect().height);
+        }
+        if (caret_line_start >= 0) {
+            if (reset_font_height) {
+                font_height = getFontMetrics(getFont()).getHeight();
+                reset_font_height = false;
+            }
+            if (highlight != null) {
+                getHighlighter().removeHighlight(highlight);
+                highlight = null;
+            }
+            try {
+                highlight = getHighlighter().addHighlight(caret_line_start, caret_line_end, painter);
+            } catch (BadLocationException ex) {
+                ex.printStackTrace();
+            }
         }
     }
     BlockModeHandler blockDocumentFilter;
@@ -358,8 +432,10 @@ public class CodeEditorPane extends LineNumbersTextPane {
         return new LineWrapEditorKit();
     }
     protected int font_width = 0;
+    protected int font_height = 0;
     protected String font_width_ex = "a";
     protected boolean reset_font_width = true;
+    protected boolean reset_font_height = true;
 
     @Override
     public void setFont(Font font) {
@@ -371,6 +447,7 @@ public class CodeEditorPane extends LineNumbersTextPane {
         } else {
             super.setFont(font);
             reset_font_width = true;
+            reset_font_height = true;
         }
     }
 }
