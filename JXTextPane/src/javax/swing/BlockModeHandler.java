@@ -143,13 +143,12 @@ public class BlockModeHandler extends DocumentFilter implements ClipboardOwner {
     }
 
     /*void printActions() {
-        System.err.println("ACTIONS:");
-        for (Object object : component.getActionMap().keys()) {
-            System.err.println(object + " " + component.getActionMap().get(object));
-        }
-        System.err.println("=======================");
+    System.err.println("ACTIONS:");
+    for (Object object : component.getActionMap().keys()) {
+    System.err.println(object + " " + component.getActionMap().get(object));
+    }
+    System.err.println("=======================");
     }*/
-
     void resetPaste() {
         final Action paste = component.getActionMap().get("paste");
         //printActions();
@@ -285,7 +284,7 @@ public class BlockModeHandler extends DocumentFilter implements ClipboardOwner {
             StringBuilder sb = new StringBuilder();
             try {
                 int cnt = selections.length;
-                for (int i = 0; i < cnt; i++) {
+                for (int i = 0; i < cnt - 1; i++) {//do not use the last highlight dedicated to highlight current line !!! Ok, that's not clean :)
                     int start = selections[i].getStartOffset();
                     int end = selections[i].getEndOffset();
                     sb.append(component.getText(start, end - start));
@@ -307,7 +306,7 @@ public class BlockModeHandler extends DocumentFilter implements ClipboardOwner {
         if (isBlockMode() && (selections != null && selections.length > 0)) {
             try {
                 int cnt = selections.length;
-                for (int i = 0; i < cnt; i++) {
+                for (int i = 0; i < cnt - 1; i++) {//do not use the last highlight dedicated to highlight current line !!! Ok, that's not clean :)
                     int start = selections[i].getStartOffset();
                     int end = selections[i].getEndOffset();
                     component.getDocument().remove(start, end - start);
@@ -329,7 +328,7 @@ public class BlockModeHandler extends DocumentFilter implements ClipboardOwner {
                 String[] lines = s.split("\n");
                 try {
                     int cnt = selections.length;
-                    for (int i = 0; i < cnt; i++) {
+                    for (int i = 0; i < cnt - 1; i++) {//do not use the last highlight dedicated to highlight current line !!! Ok, that's not clean :)
                         int start = selections[i].getStartOffset();
                         int end = selections[i].getEndOffset();
                         if (start != end) {
@@ -360,7 +359,7 @@ public class BlockModeHandler extends DocumentFilter implements ClipboardOwner {
         if (isBlockMode() && (selections != null && selections.length > 0)) {
             try {
                 int cnt = selections.length;
-                for (int i = 0; i < cnt; i++) {
+                for (int i = 0; i < cnt - 1; i++) {//do not use the last highlight dedicated to highlight current line !!! Ok, that's not clean :)
                     int start = selections[i].getStartOffset();
                     b.insertString(start, str, a);
                 }
@@ -381,7 +380,7 @@ public class BlockModeHandler extends DocumentFilter implements ClipboardOwner {
         if (isBlockMode() && (selections != null && selections.length > 0)) {
             try {
                 int cnt = selections.length;
-                for (int i = 0; i < cnt; i++) {
+                for (int i = 0; i < cnt - 1; i++) {//do not use the last highlight dedicated to highlight current line !!! Ok, that's not clean :)
                     int start = selections[i].getStartOffset();
                     int end = selections[i].getEndOffset();
                     b.remove(start, end - start);
@@ -403,7 +402,7 @@ public class BlockModeHandler extends DocumentFilter implements ClipboardOwner {
         if (isBlockMode() && (selections != null && selections.length > 0)) {
             try {
                 int cnt = selections.length;
-                for (int i = 0; i < cnt; i++) {
+                for (int i = 0; i < cnt - 1; i++) {//do not use the last highlight dedicated to highlight current line !!! Ok, that's not clean :)
                     int start = selections[i].getStartOffset();
                     int end = selections[i].getEndOffset();
                     super_replace(b, start, end - start, text, attrs);

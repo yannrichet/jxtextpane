@@ -4,7 +4,7 @@ import java.awt.Color;
 import java.awt.Font;
 import java.awt.GraphicsEnvironment;
 import java.util.HashMap;
-import javax.swing.SyntaxColorizer.RegExpHashMap;
+import javax.swing.DefaultSyntaxColorizer.RegExpHashMap;
 import javax.swing.text.BadLocationException;
 import static javax.swing.Common.*;
 
