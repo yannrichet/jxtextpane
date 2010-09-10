@@ -18,7 +18,6 @@ public class DefaultSyntaxColorizer extends SyntaxColorizer {
     private HashMap<Color, MutableAttributeSet> colors;
     UndoableEditListener undo;
     JXTextPane component;
-    
 
     public DefaultSyntaxColorizer(JXTextPane component, HashMap<String, Color> keywords) {
         this.component = component;
@@ -45,6 +44,10 @@ public class DefaultSyntaxColorizer extends SyntaxColorizer {
     public void setKeywordColor(HashMap<String, Color> keywords) {
         colors = new HashMap<Color, MutableAttributeSet>();
         this.keywords = keywords;
+
+        if (keywords == null) {
+            return;
+        }
         if (keywords instanceof RegExpHashMap) {
             ((RegExpHashMap) keywords).keyAsRegexp = false;
         }
@@ -539,6 +542,9 @@ public class DefaultSyntaxColorizer extends SyntaxColorizer {
      */
     public boolean isKeyword(String token) {
         //return keywords.contains(token);
+        if (keywords == null) {
+            return false;
+        }
         return keywords.containsKey(token);
     }
 
