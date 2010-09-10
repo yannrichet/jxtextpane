@@ -184,7 +184,7 @@ public class REditorPane extends CodeEditorPane {
             keyword_color.put(f, Color.BLUE);
         }
         setKeywordColor(keyword_color);
-        syntaxDocumentFilter.operands = syntaxDocumentFilter.operands.replace(".", ""); // '.' is not an operand char in R
+       syntaxDocumentFilter.setOperands(syntaxDocumentFilter.getOperands().replace(".", "")); // '.' is not an operand char in R
 
         if (help == null) {
             help = new RHelpMap();

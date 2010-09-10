@@ -51,7 +51,7 @@ public class LineWrapTest {
             }
         });
 
-        ((AbstractDocument) edit.getDocument()).setDocumentFilter(new SyntaxColorizer(edit, syntax));
+        ((AbstractDocument) edit.getDocument()).setDocumentFilter(new DefaultSyntaxColorizer(edit, syntax));
 
         JFrame frame = new JFrame("Syntax Highlighting");
         frame.getContentPane().add(new JScrollPane(edit));

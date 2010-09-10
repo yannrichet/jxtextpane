@@ -17,6 +17,7 @@ import javax.swing.event.MenuKeyEvent;
 import javax.swing.event.MenuKeyListener;
 import javax.swing.text.AbstractDocument;
 import javax.swing.text.BadLocationException;
+import javax.swing.text.DocumentFilter;
 import javax.swing.text.EditorKit;
 import javax.swing.text.Element;
 import javax.swing.text.Highlighter;
@@ -406,8 +407,12 @@ public class CodeEditorPane extends LineNumbersTextPane {
             }
         }
     }
-    BlockModeHandler blockDocumentFilter;
-    SyntaxColorizer syntaxDocumentFilter;
+    public BlockModeHandler blockDocumentFilter;
+    public SyntaxColorizer syntaxDocumentFilter;
+
+    protected SyntaxColorizer buildSyntaxColorizer(HashMap<String, Color> keywords) {
+        return new DefaultSyntaxColorizer(this, keywords);
+    }
 
     public void setKeywordColor(HashMap<String, Color> keywords) {
         if (keywords == null) {
@@ -415,7 +420,7 @@ public class CodeEditorPane extends LineNumbersTextPane {
             ((AbstractDocument) this.getDocument()).setDocumentFilter(blockDocumentFilter);
         } else {
             blockDocumentFilter = new BlockModeHandler(this);
-            syntaxDocumentFilter = new SyntaxColorizer(this, keywords);
+            syntaxDocumentFilter = buildSyntaxColorizer(keywords);
             ((AbstractDocument) this.getDocument()).setDocumentFilter(new DocumentFilterChain(syntaxDocumentFilter, blockDocumentFilter));
         }
     }

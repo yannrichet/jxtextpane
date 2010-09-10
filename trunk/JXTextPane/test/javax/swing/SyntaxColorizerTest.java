@@ -18,7 +18,7 @@ import static javax.swing.Common.*;
 public class SyntaxColorizerTest {
 
     public static void main(String a[]) throws BadLocationException {
-        final HashMap syntax = new SyntaxColorizer.RegExpHashMap();
+        final HashMap syntax = new DefaultSyntaxColorizer.RegExpHashMap();
         //syntax.put("abstract", Color.BLUE);
         syntax.put("abs(\\w+)", Color.BLUE);
         syntax.put("boolean", Color.BLUE);

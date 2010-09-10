@@ -2,7 +2,7 @@ package javax.swing;
 
 import java.awt.Color;
 import java.util.HashMap;
-import javax.swing.SyntaxColorizer.RegExpHashMap;
+import javax.swing.DefaultSyntaxColorizer.RegExpHashMap;
 import javax.swing.text.BadLocationException;
 
 /**
