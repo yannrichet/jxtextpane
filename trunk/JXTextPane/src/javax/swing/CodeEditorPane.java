@@ -249,7 +249,7 @@ public class CodeEditorPane extends LineNumbersTextPane {
         if (beforeCaret.length() > 0) {
             char c;
             c = beforeCaret.charAt(beforeCaret.length() - i);
-            while (!syntaxDocumentFilter.isDelimiter(c)) {
+            while (!syntaxDocumentFilter.isTokenSeparator(c)) {
                 base = c + base;
                 i++;
                 if (((getCaretPosition() - i) >= 0)) {

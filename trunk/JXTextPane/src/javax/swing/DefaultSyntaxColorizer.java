@@ -389,7 +389,7 @@ public class DefaultSyntaxColorizer extends SyntaxColorizer {
         while (startOffset <= endOffset) {
             //  skip the delimiters to find the start of a new token
 
-            while (isDelimiter(content.charAt(startOffset))) {
+            while (isTokenSeparator(content.charAt(startOffset))) {
                 if (startOffset < endOffset) {
                     startOffset++;
                 } else {
@@ -448,7 +448,7 @@ public class DefaultSyntaxColorizer extends SyntaxColorizer {
         int endOfToken = startOffset + 1;
 
         while (endOfToken <= endOffset) {
-            if (isDelimiter(content.charAt(endOfToken))) {
+            if (isTokenSeparator(content.charAt(endOfToken))) {
                 break;
             }
 
@@ -513,9 +513,8 @@ public class DefaultSyntaxColorizer extends SyntaxColorizer {
     /*
      *  Override for other languages
      */
-    public boolean isDelimiter(char character) {
-        if (Character.isWhitespace(character)
-                || getOperands().indexOf(character) != -1) {
+    public boolean isTokenSeparator(char character) {
+        if (Character.isWhitespace(character) || getOperands().indexOf(character) != -1) {
             return true;
         } else {
             return false;

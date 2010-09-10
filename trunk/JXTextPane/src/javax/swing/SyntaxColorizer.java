@@ -11,9 +11,9 @@ public abstract class SyntaxColorizer extends DocumentFilter {
     public final static String ALL_OPERANDS = ";:.!?{}()[]<>+-*/=\\%&|^~$@\"'`#";
     private String operands = ALL_OPERANDS;
 
-    abstract boolean isDelimiter(char character);
+    public abstract boolean isTokenSeparator(char character);
 
-    abstract boolean isKeyword(String token);
+    public abstract boolean isKeyword(String token);
 
     /**
      * @return the operands
