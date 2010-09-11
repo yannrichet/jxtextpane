@@ -1,8 +1,9 @@
 package javax.swing;
 
+import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Font;
-import java.awt.GraphicsEnvironment;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.HashMap;
 import javax.swing.DefaultSyntaxColorizer.RegExpHashMap;
 import javax.swing.text.BadLocationException;
@@ -58,12 +59,26 @@ public class CodeEditTest {
 
         edit.setKeywordHelp(help);
 
-        edit.setText(read("src/javax/swing/JXTextPane.java"));
+        JButton button = new JButton("Load ...");
+        button.addActionListener(new ActionListener() {
+
+            public void actionPerformed(ActionEvent e) {
+                try {
+                    edit.setText(read("src/javax/swing/JXTextPane.java"));
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
+
+            }
+        });
+
+        //edit.setText(read("src/javax/swing/JXTextPane.java"));
 
         edit.setVerticalLineAtPos(80);
 
         JFrame frame = new JFrame("Code editor");
         frame.getContentPane().add(edit.getContainerWithLines());
+        frame.getContentPane().add(button, BorderLayout.SOUTH);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setSize(800, 300);
         frame.setVisible(true);

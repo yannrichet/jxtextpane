@@ -19,6 +19,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.beans.PropertyChangeListener;
 import java.io.IOException;
+import java.util.Arrays;
 import javax.swing.text.*;
 
 /** DocumentFilter to support block mode selection. Selection highlighting is overloaded with custom one.
@@ -280,7 +281,7 @@ public class BlockModeHandler extends DocumentFilter implements ClipboardOwner {
             return null;
         }
         Highlighter.Highlight[] selections = component.getHighlighter().getHighlights();
-        if (isBlockMode() && (selections != null && selections.length > 0)) {
+        if (isBlockMode() && (selections != null && selections.length > 1)) {
             StringBuilder sb = new StringBuilder();
             try {
                 int cnt = selections.length;
@@ -303,7 +304,7 @@ public class BlockModeHandler extends DocumentFilter implements ClipboardOwner {
             return;
         }
         Highlighter.Highlight[] selections = component.getHighlighter().getHighlights();
-        if (isBlockMode() && (selections != null && selections.length > 0)) {
+        if (isBlockMode() && (selections != null && selections.length > 1)) {
             try {
                 int cnt = selections.length;
                 for (int i = 0; i < cnt - 1; i++) {//do not use the last highlight dedicated to highlight current line !!! Ok, that's not clean :)
@@ -323,7 +324,7 @@ public class BlockModeHandler extends DocumentFilter implements ClipboardOwner {
         }
         if (isBlockMode()) {
             Highlighter.Highlight[] selections = component.getHighlighter().getHighlights();
-            if (selections != null && selections.length > 0) {
+            if (selections != null && selections.length > 1) {
                 setBlockMode(false);//needed to not apply block mode insert which duplicate string for each selections
                 String[] lines = s.split("\n");
                 try {
@@ -356,12 +357,24 @@ public class BlockModeHandler extends DocumentFilter implements ClipboardOwner {
             return;
         }
         Highlighter.Highlight[] selections = component.getHighlighter().getHighlights();
-        if (isBlockMode() && (selections != null && selections.length > 0)) {
+        if (!(offs == 0 && 0 == component.getDocument().getLength()) && isBlockMode() && (selections != null && selections.length > 1)) {
             try {
                 int cnt = selections.length;
+                int start[] = new int[cnt - 1];
+                boolean selectInsert = false;
                 for (int i = 0; i < cnt - 1; i++) {//do not use the last highlight dedicated to highlight current line !!! Ok, that's not clean :)
-                    int start = selections[i].getStartOffset();
-                    b.insertString(start, str, a);
+                    start[i] = selections[i].getStartOffset();
+                    if (start[i] - 1 == offs || selections[i].getEndOffset() - 1 == offs) {
+                        selectInsert = true;
+                    }
+                }
+                if (selectInsert) {// if not, it means that insert is not related to selection... (like in insrtString( O, ...))
+                    Arrays.sort(start);
+                    for (int i = start.length - 1; i >= 0; i--) {
+                        b.insertString(start[i], str, a);
+                    }
+                } else {
+                    b.insertString(offs, str, a);
                 }
             } catch (Exception ex) {
                 ex.printStackTrace();
@@ -377,13 +390,30 @@ public class BlockModeHandler extends DocumentFilter implements ClipboardOwner {
             return;
         }
         Highlighter.Highlight[] selections = component.getHighlighter().getHighlights();
-        if (isBlockMode() && (selections != null && selections.length > 0)) {
+        if (!(offs == 0 && len == component.getDocument().getLength()) && isBlockMode() && (selections != null && selections.length > 1)) {
             try {
                 int cnt = selections.length;
+                int start[] = new int[cnt - 1];
+                int end[] = new int[cnt - 1];
+                boolean selectRemove = false;
                 for (int i = 0; i < cnt - 1; i++) {//do not use the last highlight dedicated to highlight current line !!! Ok, that's not clean :)
-                    int start = selections[i].getStartOffset();
-                    int end = selections[i].getEndOffset();
-                    b.remove(start, end - start);
+                    start[i] = selections[i].getStartOffset();
+                    end[i] = selections[i].getEndOffset();
+                    System.err.println(offs + " " + start[i] + " " + end[i]);
+                    if (start[i] - 1 == offs || end[i] - 1 == offs) {
+                        selectRemove = true;
+                    }
+                }
+                if (selectRemove) {// if not, it means that insert is not related to selection... (like in insrtString( O, ...))
+                    Arrays.sort(start);
+                    Arrays.sort(end);
+                    for (int i = start.length - 1; i >= 0; i--) {
+                        System.err.println(start[i] + " .. " + (end[i] - start[i]));
+                        b.remove(start[i], end[i] - start[i]);
+                    }
+                } else {
+                    System.err.println("!!!");
+                    b.remove(offs, len);
                 }
             } catch (Exception ex) {
                 ex.printStackTrace();
@@ -416,7 +446,7 @@ public class BlockModeHandler extends DocumentFilter implements ClipboardOwner {
     }
 
     private void super_replace(DocumentFilter.FilterBypass b, int offset, int length, String text,
-                               AttributeSet attrs) throws BadLocationException {
+            AttributeSet attrs) throws BadLocationException {
         if (component == null) {
             return;
         }
