@@ -399,7 +399,7 @@ public class BlockModeHandler extends DocumentFilter implements ClipboardOwner {
                 for (int i = 0; i < cnt - 1; i++) {//do not use the last highlight dedicated to highlight current line !!! Ok, that's not clean :)
                     start[i] = selections[i].getStartOffset();
                     end[i] = selections[i].getEndOffset();
-                    System.err.println(offs + " " + start[i] + " " + end[i]);
+                    //System.err.println(offs + " " + start[i] + " " + end[i]);
                     if (start[i] - 1 == offs || end[i] - 1 == offs) {
                         selectRemove = true;
                     }
@@ -408,11 +408,11 @@ public class BlockModeHandler extends DocumentFilter implements ClipboardOwner {
                     Arrays.sort(start);
                     Arrays.sort(end);
                     for (int i = start.length - 1; i >= 0; i--) {
-                        System.err.println(start[i] + " .. " + (end[i] - start[i]));
+                        //System.err.println(start[i] + " .. " + (end[i] - start[i]));
                         b.remove(start[i], end[i] - start[i]);
                     }
                 } else {
-                    System.err.println("!!!");
+                    //System.err.println("!!!");
                     b.remove(offs, len);
                 }
             } catch (Exception ex) {
