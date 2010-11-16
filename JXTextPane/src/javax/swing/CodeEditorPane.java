@@ -17,7 +17,7 @@ import javax.swing.event.MenuKeyEvent;
 import javax.swing.event.MenuKeyListener;
 import javax.swing.text.AbstractDocument;
 import javax.swing.text.BadLocationException;
-import javax.swing.text.DocumentFilter;
+import javax.swing.text.DefaultHighlighter.DefaultHighlightPainter;
 import javax.swing.text.EditorKit;
 import javax.swing.text.Element;
 import javax.swing.text.Highlighter;
@@ -78,24 +78,76 @@ public class CodeEditorPane extends LineNumbersTextPane {
     }
     boolean init = false;
     protected int vertical_line = -1;
+    private boolean caret_line = true;
     protected int caret_line_start = -1;
     protected int caret_line_end = -1;
+    private boolean caret_brace = true;
+    protected int caret_brace_start = -1;
+    protected int caret_brace_end = -1;
     protected Color vertical_line_color = new Color(1.0f, 0.0f, 0.0f, 0.4f);
-    protected Color caret_line_color = new Color(1.0f, 0.0f, 0.0f, 0.1f);
+    protected Color caret_line_color = new Color(1.0f, 0.0f, 0.0f, 0.2f);
+    protected Color caret_brace_color = new Color(1.0f, 0.0f, 0.0f, 0.2f);
     protected HashMap<String, String> help;
     protected JPopupMenu completionMenu;
     public static int DEFAULT_FONT_SIZE = 10;
     KeyAdapter keyAdapter;
     int maxCompletionMenuItems = 10;
+    public static char[][] OpenCloseBrace = {{'(', ')'}, {'[', ']'}, {'{', '}'}, {'<', '>'}};
 
-    public class CurrentLineHighlighter implements CaretListener {
+    public class CodeHighlighter implements CaretListener {
 
         public void caretUpdate(CaretEvent e) {
             JTextComponent comp = (JTextComponent) e.getSource();
             int pos = comp.getCaretPosition();
-            Element elem = Utilities.getParagraphElement(comp, pos);
-            caret_line_start = elem.getStartOffset();
-            caret_line_end = elem.getEndOffset();
+            if (isCaretBrace() && pos > 1 && pos < comp.getText().length() - 1) {
+                char c = comp.getText().charAt(pos);
+                char cp = comp.getText().charAt(pos - 1);
+                caret_brace_start = -1;
+                for (char[] cs : OpenCloseBrace) {
+                    char openBrace = cs[0];
+                    char closeBrace = cs[1];
+                    if (cp == openBrace) {
+                        int offset = 0;
+                        int open = 0;
+                        char t = comp.getText().charAt(pos + offset);
+                        while (!(t == closeBrace && open == 0) && pos + offset < comp.getText().length() - 1) {
+                            if (t == openBrace) {
+                                open++;
+                            }
+                            if (t == closeBrace) {
+                                open--;
+                            }
+                            offset++;
+                            t = comp.getText().charAt(pos + offset);
+                        }
+                        caret_brace_start = pos;
+                        caret_brace_end = pos + offset;
+                        break;
+                    } else if (c == closeBrace) {
+                        int offset = 1;
+                        int open = 0;
+                        char t = comp.getText().charAt(pos - offset);
+                        while (!(t == openBrace && open == 0) && pos + offset > 0) {
+                            if (t == openBrace) {
+                                open++;
+                            }
+                            if (t == closeBrace) {
+                                open--;
+                            }
+                            offset++;
+                            t = comp.getText().charAt(pos - offset);
+                        }
+                        caret_brace_start = pos - offset + 1;
+                        caret_brace_end = pos;
+                        break;
+                    }
+                }
+            }
+            if (isCaretLine()) {
+                Element elem = Utilities.getParagraphElement(comp, pos);
+                caret_line_start = elem.getStartOffset();
+                caret_line_end = elem.getEndOffset();
+            }
         }
     }
 
@@ -226,7 +278,10 @@ public class CodeEditorPane extends LineNumbersTextPane {
         };
         addKeyListener(keyAdapter);
 
-        addCaretListener(new CurrentLineHighlighter());
+        addCaretListener(new CodeHighlighter());
+
+        blockDocumentFilter = new BlockModeHandler(this);
+        blockDocumentFilter.setTailHighlights(getSpecializedHighlights());
     }
 
     @Override
@@ -349,8 +404,53 @@ public class CodeEditorPane extends LineNumbersTextPane {
     public void setVerticalLineAtPos(int pos) {
         this.vertical_line = pos;
     }
-    public Highlighter.HighlightPainter painter = new ComponentWidthHighlightPainter(caret_line_color);
-    public Object highlight;
+
+    /**
+     * @return the caret_line
+     */
+    public boolean isCaretLine() {
+        return caret_line;
+    }
+
+    /**
+     * @param caret_line the caret_line to set
+     */
+    public void setCaretLine(boolean caret_line) {
+        this.caret_line = caret_line;
+        if (blockDocumentFilter != null) {
+            blockDocumentFilter.setTailHighlights(getSpecializedHighlights());
+        }
+    }
+
+    /**
+     * @return the caret_brace
+     */
+    public boolean isCaretBrace() {
+        return caret_brace;
+    }
+
+    /**
+     * @param caret_brace the caret_brace to set
+     */
+    public void setCaretBrace(boolean caret_brace) {
+        this.caret_brace = caret_brace;
+        if (blockDocumentFilter != null) {
+            blockDocumentFilter.setTailHighlights(getSpecializedHighlights());
+        }
+    }
+
+    int getSpecializedHighlights() {
+        int n = 0;
+        if (isCaretBrace()) {
+            n++;
+        }
+        if (isCaretLine()) {
+            n++;
+        }
+        return n;
+    }
+    public Highlighter.HighlightPainter painter_width = new ComponentWidthHighlightPainter(caret_line_color);
+    public Object highlight_width;
 
     public class ComponentWidthHighlightPainter extends LayeredHighlighter.LayerPainter {
 
@@ -378,6 +478,8 @@ public class CodeEditorPane extends LineNumbersTextPane {
         }
         protected Color color; // The color for the underline
     }
+    public Highlighter.HighlightPainter painter_brace = new DefaultHighlightPainter(caret_brace_color);
+    public Object highlight_brace;
 
     @Override
     public void paint(Graphics g) {
@@ -391,19 +493,47 @@ public class CodeEditorPane extends LineNumbersTextPane {
             g.setColor(vertical_line_color);
             g.drawLine(getVisibleRect().x + xline, getVisibleRect().y, getVisibleRect().x + xline, getVisibleRect().y + getVisibleRect().height);
         }
-        if (caret_line_start >= 0) {
-            if (reset_font_height) {
-                font_height = getFontMetrics(getFont()).getHeight();
-                reset_font_height = false;
+        if (caret_line) {
+            if (caret_line_start >= 0) {
+                if (reset_font_height) {
+                    font_height = getFontMetrics(getFont()).getHeight();
+                    reset_font_height = false;
+                }
+                if (highlight_width != null) {
+                    getHighlighter().removeHighlight(highlight_width);
+                    highlight_width = null;
+                }
+                try {
+                    highlight_width = getHighlighter().addHighlight(caret_line_start, caret_line_end, painter_width);
+                } catch (BadLocationException ex) {
+                    ex.printStackTrace();
+                }
             }
-            if (highlight != null) {
-                getHighlighter().removeHighlight(highlight);
-                highlight = null;
-            }
-            try {
-                highlight = getHighlighter().addHighlight(caret_line_start, caret_line_end, painter);
-            } catch (BadLocationException ex) {
-                ex.printStackTrace();
+        }
+        if (caret_brace) {
+            if (caret_brace_start >= 0) {
+                if (reset_font_height) {
+                    font_height = getFontMetrics(getFont()).getHeight();
+                    reset_font_height = false;
+                }
+                if (highlight_brace != null) {
+                    getHighlighter().removeHighlight(highlight_brace);
+                    highlight_brace = null;
+                }
+                try {
+                    highlight_brace = getHighlighter().addHighlight(caret_brace_start, caret_brace_end, painter_brace);
+                } catch (BadLocationException ex) {
+                    ex.printStackTrace();
+                }
+            } else {
+                if (reset_font_height) {
+                    font_height = getFontMetrics(getFont()).getHeight();
+                    reset_font_height = false;
+                }
+                if (highlight_brace != null) {
+                    getHighlighter().removeHighlight(highlight_brace);
+                    highlight_brace = null;
+                }
             }
         }
     }
@@ -415,11 +545,11 @@ public class CodeEditorPane extends LineNumbersTextPane {
     }
 
     public void setKeywordColor(HashMap<String, Color> keywords) {
+        blockDocumentFilter = new BlockModeHandler(this);
+        blockDocumentFilter.setTailHighlights(getSpecializedHighlights());
         if (keywords == null) {
-            blockDocumentFilter = new BlockModeHandler(this);
             ((AbstractDocument) this.getDocument()).setDocumentFilter(blockDocumentFilter);
         } else {
-            blockDocumentFilter = new BlockModeHandler(this);
             syntaxDocumentFilter = buildSyntaxColorizer(keywords);
             ((AbstractDocument) this.getDocument()).setDocumentFilter(new DocumentFilterChain(syntaxDocumentFilter, blockDocumentFilter));
         }

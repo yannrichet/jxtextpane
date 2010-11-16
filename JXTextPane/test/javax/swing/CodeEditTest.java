@@ -72,7 +72,7 @@ public class CodeEditTest {
             }
         });
 
-        //edit.setText(read("src/javax/swing/JXTextPane.java"));
+        edit.setText(read("src/javax/swing/JXTextPane.java"));
 
         edit.setVerticalLineAtPos(80);
 
