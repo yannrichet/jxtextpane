@@ -275,6 +275,11 @@ public class BlockModeHandler extends DocumentFilter implements ClipboardOwner {
     public void lostOwnership(Clipboard clpbrd, Transferable t) {
         //System.err.println("lostOwnership");
     }
+    int tailHighlights = 0;
+
+    public void setTailHighlights(int n) {
+        tailHighlights = n;
+    }
 
     public String getSelectedBlock() {
         if (component == null) {
@@ -285,7 +290,7 @@ public class BlockModeHandler extends DocumentFilter implements ClipboardOwner {
             StringBuilder sb = new StringBuilder();
             try {
                 int cnt = selections.length;
-                for (int i = 0; i < cnt - 1; i++) {//do not use the last highlight dedicated to highlight current line !!! Ok, that's not clean :)
+                for (int i = 0; i < cnt - tailHighlights; i++) {//do not use the last highlight dedicated to highlight current line !!! Ok, that's not clean :)
                     int start = selections[i].getStartOffset();
                     int end = selections[i].getEndOffset();
                     sb.append(component.getText(start, end - start));
@@ -307,7 +312,7 @@ public class BlockModeHandler extends DocumentFilter implements ClipboardOwner {
         if (isBlockMode() && (selections != null && selections.length > 1)) {
             try {
                 int cnt = selections.length;
-                for (int i = 0; i < cnt - 1; i++) {//do not use the last highlight dedicated to highlight current line !!! Ok, that's not clean :)
+                for (int i = 0; i < cnt - tailHighlights; i++) {//do not use the last highlight dedicated to highlight current line !!! Ok, that's not clean :)
                     int start = selections[i].getStartOffset();
                     int end = selections[i].getEndOffset();
                     component.getDocument().remove(start, end - start);
@@ -329,7 +334,7 @@ public class BlockModeHandler extends DocumentFilter implements ClipboardOwner {
                 String[] lines = s.split("\n");
                 try {
                     int cnt = selections.length;
-                    for (int i = 0; i < cnt - 1; i++) {//do not use the last highlight dedicated to highlight current line !!! Ok, that's not clean :)
+                    for (int i = 0; i < cnt - tailHighlights; i++) {//do not use the last highlight dedicated to highlight current line !!! Ok, that's not clean :)
                         int start = selections[i].getStartOffset();
                         int end = selections[i].getEndOffset();
                         if (start != end) {
@@ -360,9 +365,9 @@ public class BlockModeHandler extends DocumentFilter implements ClipboardOwner {
         if (!(offs == 0 && 0 == component.getDocument().getLength()) && isBlockMode() && (selections != null && selections.length > 1)) {
             try {
                 int cnt = selections.length;
-                int start[] = new int[cnt - 1];
+                int start[] = new int[cnt - tailHighlights];
                 boolean selectInsert = false;
-                for (int i = 0; i < cnt - 1; i++) {//do not use the last highlight dedicated to highlight current line !!! Ok, that's not clean :)
+                for (int i = 0; i < cnt - tailHighlights; i++) {//do not use the last highlight dedicated to highlight current line !!! Ok, that's not clean :)
                     start[i] = selections[i].getStartOffset();
                     if (start[i] - 1 == offs || selections[i].getEndOffset() - 1 == offs) {
                         selectInsert = true;
@@ -393,10 +398,10 @@ public class BlockModeHandler extends DocumentFilter implements ClipboardOwner {
         if (!(offs == 0 && len == component.getDocument().getLength()) && isBlockMode() && (selections != null && selections.length > 1)) {
             try {
                 int cnt = selections.length;
-                int start[] = new int[cnt - 1];
-                int end[] = new int[cnt - 1];
+                int start[] = new int[cnt - tailHighlights];
+                int end[] = new int[cnt - tailHighlights];
                 boolean selectRemove = false;
-                for (int i = 0; i < cnt - 1; i++) {//do not use the last highlight dedicated to highlight current line !!! Ok, that's not clean :)
+                for (int i = 0; i < cnt - tailHighlights; i++) {//do not use the last highlight dedicated to highlight current line !!! Ok, that's not clean :)
                     start[i] = selections[i].getStartOffset();
                     end[i] = selections[i].getEndOffset();
                     //System.err.println(offs + " " + start[i] + " " + end[i]);
@@ -432,7 +437,7 @@ public class BlockModeHandler extends DocumentFilter implements ClipboardOwner {
         if (isBlockMode() && (selections != null && selections.length > 0)) {
             try {
                 int cnt = selections.length;
-                for (int i = 0; i < cnt - 1; i++) {//do not use the last highlight dedicated to highlight current line !!! Ok, that's not clean :)
+                for (int i = 0; i < cnt - tailHighlights; i++) {//do not use the last highlight dedicated to highlight current line !!! Ok, that's not clean :)
                     int start = selections[i].getStartOffset();
                     int end = selections[i].getEndOffset();
                     super_replace(b, start, end - start, text, attrs);
@@ -446,7 +451,7 @@ public class BlockModeHandler extends DocumentFilter implements ClipboardOwner {
     }
 
     private void super_replace(DocumentFilter.FilterBypass b, int offset, int length, String text,
-            AttributeSet attrs) throws BadLocationException {
+                               AttributeSet attrs) throws BadLocationException {
         if (component == null) {
             return;
         }
