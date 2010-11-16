@@ -92,7 +92,7 @@ public class CodeEditorPane extends LineNumbersTextPane {
     public static int DEFAULT_FONT_SIZE = 10;
     KeyAdapter keyAdapter;
     int maxCompletionMenuItems = 10;
-    public static char[][] OpenCloseBrace = {{'(', ')'}, {'[', ']'}, {'{', '}'}, {'<', '>'}};
+    public static char[][] OpenCloseBrace = {{'(', ')'}, {'[', ']'}, {'{', '}'}, {'<', '>'}, {'\'', '\''}, {'"', '"'}};
 
     public class CodeHighlighter implements CaretListener {
 
@@ -113,8 +113,7 @@ public class CodeEditorPane extends LineNumbersTextPane {
                         while (!(t == closeBrace && open == 0) && pos + offset < comp.getText().length() - 1) {
                             if (t == openBrace) {
                                 open++;
-                            }
-                            if (t == closeBrace) {
+                            } else if (t == closeBrace) {
                                 open--;
                             }
                             offset++;
@@ -130,8 +129,7 @@ public class CodeEditorPane extends LineNumbersTextPane {
                         while (!(t == openBrace && open == 0) && pos + offset > 0) {
                             if (t == openBrace) {
                                 open++;
-                            }
-                            if (t == closeBrace) {
+                            } else if (t == closeBrace) {
                                 open--;
                             }
                             offset++;
