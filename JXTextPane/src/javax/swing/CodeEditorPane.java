@@ -92,7 +92,7 @@ public class CodeEditorPane extends LineNumbersTextPane {
     public static int DEFAULT_FONT_SIZE = 10;
     KeyAdapter keyAdapter;
     int maxCompletionMenuItems = 10;
-    public static char[][] OpenCloseBrace = {{'(', ')'}, {'[', ']'}, {'{', '}'}, {'<', '>'}, {'\'', '\''}, {'"', '"'}};
+    public static char[][] OpenCloseBrace = {{'(', ')'}, {'[', ']'}, {'{', '}'}/*, {'<', '>'}, {'\'', '\''}, {'"', '"'}*/};
 
     public class CodeHighlighter implements CaretListener {
 
