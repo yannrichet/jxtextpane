@@ -124,10 +124,10 @@ public class DefaultSyntaxColorizer extends SyntaxColorizer {
             } else if (str.charAt(0) == '(') {
                 str = "()";
                 caret_offset = -1;
-            } else if (str.charAt(0) == '<') {
+            } /*else if (str.charAt(0) == '<') {
                 str = "<>";
                 caret_offset = -1;
-            } else if (str.charAt(0) == '[') {
+            } */else if (str.charAt(0) == '[') {
                 str = "[]";
                 caret_offset = -1;
             } else if (str.charAt(0) == '\'') {
