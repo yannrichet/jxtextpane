@@ -18,11 +18,13 @@ import javax.swing.event.MenuKeyListener;
 import javax.swing.text.AbstractDocument;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.DefaultHighlighter.DefaultHighlightPainter;
+import javax.swing.text.DefaultStyledDocument;
 import javax.swing.text.EditorKit;
 import javax.swing.text.Element;
 import javax.swing.text.Highlighter;
 import javax.swing.text.JTextComponent;
 import javax.swing.text.LayeredHighlighter;
+import javax.swing.text.PlainDocument;
 import javax.swing.text.Utilities;
 import javax.swing.text.View;
 
@@ -153,6 +155,8 @@ public class CodeEditorPane extends LineNumbersTextPane {
         super();
         init = true;
         setFont(Font.decode(Font.MONOSPACED + " " + DEFAULT_FONT_SIZE));
+
+        setTabSize(4);
 
         completionMenu = new JPopupMenu() {
 

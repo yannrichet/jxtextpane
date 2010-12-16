@@ -1,15 +1,12 @@
 package javax.swing;
 
 import java.awt.AWTEvent;
-import java.awt.Color;
 import java.awt.Component;
 import java.awt.EventQueue;
-import java.awt.Graphics;
+import java.awt.FontMetrics;
 import java.awt.event.ActionEvent;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
-import java.awt.event.MouseWheelEvent;
-import java.awt.event.MouseWheelListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.IOException;
@@ -28,10 +25,13 @@ import javax.swing.text.EditorKit;
 import javax.swing.text.Element;
 import javax.swing.text.JTextComponent;
 import javax.swing.text.MutableAttributeSet;
+import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.Style;
 import javax.swing.text.StyleConstants;
 import javax.swing.text.StyledDocument;
 import javax.swing.text.StyledEditorKit;
+import javax.swing.text.TabSet;
+import javax.swing.text.TabStop;
 import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
 import javax.swing.undo.UndoManager;
@@ -132,6 +132,29 @@ public class JXTextPane extends JXEditorPane {
     public JXTextPane(StyledDocument doc) throws BadLocationException {
         this();
         setStyledDocument(doc);
+    }
+
+    public void setTabSize(int size) {
+        FontMetrics fm = this.getFontMetrics(this.getFont());
+        int charWidth = fm.charWidth(' ');
+        int tabWidth = charWidth * size;
+
+        // this means that only size*100 line length is supported...
+        TabStop[] tabs = new TabStop[100];
+        for (int j = 0; j < tabs.length; j++) {
+            int tab = j + 1;
+            tabs[j] = new TabStop(tab * tabWidth);
+        }
+
+        TabSet tabSet = new TabSet(tabs);
+        SimpleAttributeSet attributes = new SimpleAttributeSet();
+        StyleConstants.setTabSet(attributes, tabSet);
+        int length = this.getDocument().getLength();
+
+        try {
+            this.getStyledDocument().setParagraphAttributes(0, length, attributes, false);
+        } catch (Exception e) {
+        }
     }
 
     //from JXEditorPane
