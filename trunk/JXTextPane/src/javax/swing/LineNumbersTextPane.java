@@ -24,7 +24,7 @@ public class LineNumbersTextPane extends JXTextPane {
     private boolean displayLineNumbers = true;
     protected JSplitPane jSplitPane1;
     protected JScrollPane jScrollPane1;
-    LineNumbersSidePane linenumbers;
+    protected LineNumbersSidePane linenumbers;
 
     public Rectangle modelToScrollView(int pos) throws BadLocationException {
         Rectangle offset = super.modelToView(pos);
@@ -119,8 +119,14 @@ public class LineNumbersTextPane extends JXTextPane {
         if (!isDisplayLineNumbers()) {
             return;
         }
-        //System.err.println("updateLineNumberDivider");
-        jSplitPane1.setDividerLocation((int) (linenumbers._editor.getFontMetrics(linenumbers._editor.getFont()).getWidths()[0] * (Math.log10(((LineWrapEditorKit) getEditorKit()).number_of_lines) + 2)));
+        /*int[] widths = linenumbers._editor.getFontMetrics(linenumbers._editor.getFont()).getWidths();
+        int width = 0;
+        for (int i : widths) {
+        width = Math.max(width, i);
+        }  */
+        int width = linenumbers._editor.getFontMetrics(linenumbers._editor.getFont()).charWidth('0');
+        int div = (int) (width * (Math.floor(Math.log10(((LineWrapEditorKit) getEditorKit()).number_of_lines)) + 3));
+        jSplitPane1.setDividerLocation(div);
     }
 
     public void updateLineNumberView() {
@@ -152,7 +158,7 @@ public class LineNumbersTextPane extends JXTextPane {
         }
     }
 
-    class LineNumbersSidePane extends JPanel {
+    public class LineNumbersSidePane extends JPanel {
 
         JTextComponent _editor;
 
@@ -194,7 +200,7 @@ public class LineNumbersTextPane extends JXTextPane {
             }
 
             for (int line = startline, y = starting_y; line <= endline; y += fontHeight, line++) {
-                g.drawString(" "+Integer.toString(line), 0, y);
+                g.drawString(" " + Integer.toString(line), 0, y);
             }
 
         }
