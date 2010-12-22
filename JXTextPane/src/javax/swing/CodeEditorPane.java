@@ -128,7 +128,7 @@ public class CodeEditorPane extends LineNumbersTextPane {
                         int offset = 1;
                         int open = 0;
                         char t = comp.getText().charAt(pos - offset);
-                        while (!(t == openBrace && open == 0) && pos + offset > 0) {
+                        while (!(t == openBrace && open == 0) && pos + offset > 0 && pos + offset < comp.getText().length()) {
                             if (t == openBrace) {
                                 open++;
                             } else if (t == closeBrace) {
