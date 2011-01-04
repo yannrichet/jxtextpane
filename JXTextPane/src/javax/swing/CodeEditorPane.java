@@ -3,6 +3,7 @@ package javax.swing;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics;
+import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.Shape;
 import java.awt.event.ActionEvent;
@@ -18,13 +19,11 @@ import javax.swing.event.MenuKeyListener;
 import javax.swing.text.AbstractDocument;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.DefaultHighlighter.DefaultHighlightPainter;
-import javax.swing.text.DefaultStyledDocument;
 import javax.swing.text.EditorKit;
 import javax.swing.text.Element;
 import javax.swing.text.Highlighter;
 import javax.swing.text.JTextComponent;
 import javax.swing.text.LayeredHighlighter;
-import javax.swing.text.PlainDocument;
 import javax.swing.text.Utilities;
 import javax.swing.text.View;
 
@@ -87,7 +86,7 @@ public class CodeEditorPane extends LineNumbersTextPane {
     protected int caret_brace_start = -1;
     protected int caret_brace_end = -1;
     protected Color vertical_line_color = new Color(1.0f, 0.0f, 0.0f, 0.4f);
-    protected Color caret_line_color = new Color(1.0f, 0.0f, 0.0f, 0.2f);
+    protected Color caret_line_color = new Color(0.0f, 0.0f, 1.0f, 0.1f);
     protected Color caret_brace_color = new Color(1.0f, 0.0f, 0.0f, 0.2f);
     protected HashMap<String, String> help;
     protected JPopupMenu completionMenu;
@@ -112,32 +111,40 @@ public class CodeEditorPane extends LineNumbersTextPane {
                         int offset = 0;
                         int open = 0;
                         char t = comp.getText().charAt(pos + offset);
-                        while (!(t == closeBrace && open == 0) && pos + offset < comp.getText().length() - 1) {
+                        while ((open != 0 || t != closeBrace) && pos + offset < comp.getText().length() - 1) {
                             if (t == openBrace) {
                                 open++;
                             } else if (t == closeBrace) {
                                 open--;
                             }
                             offset++;
+                            if (pos + offset > viewEnd) {
+                                offset = 0;
+                                break;
+                            }
                             t = comp.getText().charAt(pos + offset);
                         }
                         caret_brace_start = pos;
                         caret_brace_end = pos + offset;
                         break;
                     } else if (c == closeBrace) {
-                        int offset = 1;
+                        int offset = -1;
                         int open = 0;
-                        char t = comp.getText().charAt(pos - offset);
-                        while (!(t == openBrace && open == 0) && pos + offset > 0 && pos + offset < comp.getText().length()) {
+                        char t = comp.getText().charAt(pos + offset);
+                        while ((open != 0 || t != openBrace) && pos + offset > 0) {
                             if (t == openBrace) {
                                 open++;
                             } else if (t == closeBrace) {
                                 open--;
                             }
-                            offset++;
-                            t = comp.getText().charAt(pos - offset);
+                            offset--;
+                            if (pos + offset < viewStart) {
+                                offset = 0;
+                                break;
+                            }
+                            t = comp.getText().charAt(pos + offset);
                         }
-                        caret_brace_start = pos - offset + 1;
+                        caret_brace_start = pos + offset + 1;
                         caret_brace_end = pos;
                         break;
                     }
