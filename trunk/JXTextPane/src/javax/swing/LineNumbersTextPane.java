@@ -157,6 +157,8 @@ public class LineNumbersTextPane extends JXTextPane {
             jSplitPane1.setDividerLocation(0);
         }
     }
+    protected int viewStart;
+    protected int viewEnd;
 
     public class LineNumbersSidePane extends JPanel {
 
@@ -176,15 +178,15 @@ public class LineNumbersTextPane extends JXTextPane {
             }
             // We need to properly convert the points to match the viewport
 // Read docs for viewport
-            int start = _editor.viewToModel(jScrollPane1.getViewport().getViewPosition()); //        starting pos  in document
-            int end = _editor.viewToModel(new Point(jScrollPane1.getViewport().getViewPosition().x + _editor.getWidth(),
-                    jScrollPane1.getViewport().getViewPosition().y + _editor.getHeight()));
+            viewStart = _editor.viewToModel(jScrollPane1.getViewport().getViewPosition()); //        starting pos  in document
+            viewEnd = _editor.viewToModel(new Point(jScrollPane1.getViewport().getViewPosition().x,
+                    jScrollPane1.getViewport().getViewPosition().y + jScrollPane1.getViewport().getExtentSize().height));
 // end pos in doc
 
 // translate offsets to lines
             Document doc = _editor.getDocument();
-            int startline = doc.getDefaultRootElement().getElementIndex(start) + 1;
-            int endline = doc.getDefaultRootElement().getElementIndex(end) + 1;
+            int startline = doc.getDefaultRootElement().getElementIndex(viewStart) + 1;
+            int endline = doc.getDefaultRootElement().getElementIndex(viewEnd) + 1;
 
             g.setFont(_editor.getFont());
 
@@ -193,7 +195,7 @@ public class LineNumbersTextPane extends JXTextPane {
             int starting_y = -1;
 
             try {
-                starting_y = _editor.modelToView(start).y - jScrollPane1.getViewport().getViewPosition().y + fontHeight - fontDesc;
+                starting_y = _editor.modelToView(viewStart).y - jScrollPane1.getViewport().getViewPosition().y + fontHeight - fontDesc;
             } catch (BadLocationException e1) {
                 e1.printStackTrace();
             } catch (NullPointerException e) {
