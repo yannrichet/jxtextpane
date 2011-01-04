@@ -99,7 +99,7 @@ public class BlockModeHandler extends DocumentFilter implements ClipboardOwner {
     boolean isBlockModeKeyEvent(KeyEvent e) {
         return e.isAltDown() && !e.isAltGraphDown() && !e.isControlDown();
     }
-
+    
     void resetCopy() {
         final Action copy = component.getActionMap().get("copy");
         //printActions();
