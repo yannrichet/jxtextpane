@@ -4,6 +4,7 @@ import java.awt.AWTEvent;
 import java.awt.Component;
 import java.awt.EventQueue;
 import java.awt.FontMetrics;
+import java.awt.Graphics;
 import java.awt.event.ActionEvent;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
@@ -72,6 +73,14 @@ public class JXTextPane extends JXEditorPane {
     protected EditorKit createDefaultEditorKit() {
         return new StyledEditorKit();
     }
+
+    @Override
+    public void paint(Graphics g) {
+        System.err.println(" paint");
+        super.paint(g);
+    }
+
+
 
     /** To turn around ugly overloading of paste() in JXEditorPane ... (intended to handle html style, which is not our subject)*/
     @Override
