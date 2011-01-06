@@ -3,7 +3,6 @@ package javax.swing;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics;
-import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.Shape;
 import java.awt.event.ActionEvent;
@@ -492,6 +491,7 @@ public class CodeEditorPane extends LineNumbersTextPane {
 
     @Override
     public void paint(Graphics g) {
+        System.err.println("paint");
         super.paint(g);
         if (vertical_line > 0) {
             if (reset_font_width) {

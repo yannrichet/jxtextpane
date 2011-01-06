@@ -523,11 +523,11 @@ public class BlockModeHandler extends DocumentFilter implements ClipboardOwner {
             }
 
             if ((x != r.x) || (y != r.y)) {
-                repaint(); // erase previous location of caret
                 x = r.x; // set new values for x,y,width,height
                 y = r.y;
                 width = 8;
                 height = 8;
+                repaint(); // erase previous location of caretrepain
             }
 
             if (isVisible()) {
@@ -610,6 +610,7 @@ public class BlockModeHandler extends DocumentFilter implements ClipboardOwner {
         }
 
         public Shape paintLayer(Graphics g, int offs0, int offs1, Shape bounds, JTextComponent c, View view) {
+            System.err.print(".");
             g.setColor(color == null ? c.getSelectionColor() : color);
 
             Rectangle alloc = null;
