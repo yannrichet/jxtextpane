@@ -74,14 +74,6 @@ public class JXTextPane extends JXEditorPane {
         return new StyledEditorKit();
     }
 
-    @Override
-    public void paint(Graphics g) {
-        System.err.println(" paint");
-        super.paint(g);
-    }
-
-
-
     /** To turn around ugly overloading of paste() in JXEditorPane ... (intended to handle html style, which is not our subject)*/
     @Override
     public void paste() {

@@ -96,6 +96,52 @@ public class CodeEditorPane extends LineNumbersTextPane {
 
     public class CodeHighlighter implements CaretListener {
 
+        public void updateHighlights() {
+            if (caret_line) {
+                if (caret_line_start >= 0) {
+                    if (reset_font_height) {
+                        font_height = getFontMetrics(getFont()).getHeight();
+                        reset_font_height = false;
+                    }
+                    if (highlight_width != null) {
+                        getHighlighter().removeHighlight(highlight_width);
+                        highlight_width = null;
+                    }
+                    try {
+                        highlight_width = getHighlighter().addHighlight(caret_line_start, caret_line_end, painter_width);
+                    } catch (BadLocationException ex) {
+                        ex.printStackTrace();
+                    }
+                }
+            }
+            if (caret_brace) {
+                if (caret_brace_start >= 0) {
+                    if (reset_font_height) {
+                        font_height = getFontMetrics(getFont()).getHeight();
+                        reset_font_height = false;
+                    }
+                    if (highlight_brace != null) {
+                        getHighlighter().removeHighlight(highlight_brace);
+                        highlight_brace = null;
+                    }
+                    try {
+                        highlight_brace = getHighlighter().addHighlight(caret_brace_start, caret_brace_end, painter_brace);
+                    } catch (BadLocationException ex) {
+                        ex.printStackTrace();
+                    }
+                } else {
+                    if (reset_font_height) {
+                        font_height = getFontMetrics(getFont()).getHeight();
+                        reset_font_height = false;
+                    }
+                    if (highlight_brace != null) {
+                        getHighlighter().removeHighlight(highlight_brace);
+                        highlight_brace = null;
+                    }
+                }
+            }
+        }
+
         public void caretUpdate(CaretEvent e) {
             JTextComponent comp = (JTextComponent) e.getSource();
             int pos = comp.getCaretPosition();
@@ -110,14 +156,14 @@ public class CodeEditorPane extends LineNumbersTextPane {
                         int offset = 0;
                         int open = 0;
                         char t = comp.getText().charAt(pos + offset);
-                        while ((open != 0 || t != closeBrace) && pos + offset < comp.getText().length() - 1) {
+                        while ((open != 0 || t != closeBrace) && (pos + offset) < comp.getText().length() - 1) {
                             if (t == openBrace) {
                                 open++;
                             } else if (t == closeBrace) {
                                 open--;
                             }
                             offset++;
-                            if (pos + offset > viewEnd) {
+                            if ((pos + offset) > viewEnd) {
                                 offset = 0;
                                 break;
                             }
@@ -125,19 +171,20 @@ public class CodeEditorPane extends LineNumbersTextPane {
                         }
                         caret_brace_start = pos;
                         caret_brace_end = pos + offset;
+                        updateHighlights();
                         break;
                     } else if (c == closeBrace) {
                         int offset = -1;
                         int open = 0;
                         char t = comp.getText().charAt(pos + offset);
-                        while ((open != 0 || t != openBrace) && pos + offset > 0) {
+                        while ((open != 0 || t != openBrace) && (pos + offset) > 0) {
                             if (t == openBrace) {
                                 open++;
                             } else if (t == closeBrace) {
                                 open--;
                             }
                             offset--;
-                            if (pos + offset < viewStart) {
+                            if ((pos + offset) < viewStart) {
                                 offset = 0;
                                 break;
                             }
@@ -145,6 +192,7 @@ public class CodeEditorPane extends LineNumbersTextPane {
                         }
                         caret_brace_start = pos + offset + 1;
                         caret_brace_end = pos;
+                        updateHighlights();
                         break;
                     }
                 }
@@ -153,6 +201,7 @@ public class CodeEditorPane extends LineNumbersTextPane {
                 Element elem = Utilities.getParagraphElement(comp, pos);
                 caret_line_start = elem.getStartOffset();
                 caret_line_end = elem.getEndOffset();
+                updateHighlights();
             }
         }
     }
@@ -488,10 +537,11 @@ public class CodeEditorPane extends LineNumbersTextPane {
     }
     public Highlighter.HighlightPainter painter_brace = new DefaultHighlightPainter(caret_brace_color);
     public Object highlight_brace;
+    //int p = 1;
 
     @Override
     public void paint(Graphics g) {
-        System.err.println("paint");
+        //System.err.println("paint CodeEditorPane " + (p++));
         super.paint(g);
         if (vertical_line > 0) {
             if (reset_font_width) {
@@ -501,49 +551,6 @@ public class CodeEditorPane extends LineNumbersTextPane {
             int xline = font_width * vertical_line + 2;
             g.setColor(vertical_line_color);
             g.drawLine(getVisibleRect().x + xline, getVisibleRect().y, getVisibleRect().x + xline, getVisibleRect().y + getVisibleRect().height);
-        }
-        if (caret_line) {
-            if (caret_line_start >= 0) {
-                if (reset_font_height) {
-                    font_height = getFontMetrics(getFont()).getHeight();
-                    reset_font_height = false;
-                }
-                if (highlight_width != null) {
-                    getHighlighter().removeHighlight(highlight_width);
-                    highlight_width = null;
-                }
-                try {
-                    highlight_width = getHighlighter().addHighlight(caret_line_start, caret_line_end, painter_width);
-                } catch (BadLocationException ex) {
-                    ex.printStackTrace();
-                }
-            }
-        }
-        if (caret_brace) {
-            if (caret_brace_start >= 0) {
-                if (reset_font_height) {
-                    font_height = getFontMetrics(getFont()).getHeight();
-                    reset_font_height = false;
-                }
-                if (highlight_brace != null) {
-                    getHighlighter().removeHighlight(highlight_brace);
-                    highlight_brace = null;
-                }
-                try {
-                    highlight_brace = getHighlighter().addHighlight(caret_brace_start, caret_brace_end, painter_brace);
-                } catch (BadLocationException ex) {
-                    ex.printStackTrace();
-                }
-            } else {
-                if (reset_font_height) {
-                    font_height = getFontMetrics(getFont()).getHeight();
-                    reset_font_height = false;
-                }
-                if (highlight_brace != null) {
-                    getHighlighter().removeHighlight(highlight_brace);
-                    highlight_brace = null;
-                }
-            }
         }
     }
     public BlockModeHandler blockDocumentFilter;

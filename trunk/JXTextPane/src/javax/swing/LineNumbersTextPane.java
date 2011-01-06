@@ -33,6 +33,18 @@ public class LineNumbersTextPane extends JXTextPane {
         return offset;
     }
 
+    @Override
+    public void paint(Graphics g) {
+        super.paint(g);
+        // We need to properly convert the points to match the viewport
+        // Read docs for viewport
+        viewStart = viewToModel(jScrollPane1.getViewport().getViewPosition());
+        // starting pos  in document
+        viewEnd = viewToModel(new Point(jScrollPane1.getViewport().getViewPosition().x,
+                jScrollPane1.getViewport().getViewPosition().y + jScrollPane1.getViewport().getExtentSize().height));
+        // end pos in doc
+    }
+
     public int getNumberOfLines() {
         return ((LineWrapEditorKit) getEditorKit()).number_of_lines;
     }
@@ -176,14 +188,8 @@ public class LineNumbersTextPane extends JXTextPane {
             if (!isDisplayLineNumbers()) {
                 return;
             }
-            // We need to properly convert the points to match the viewport
-// Read docs for viewport
-            viewStart = _editor.viewToModel(jScrollPane1.getViewport().getViewPosition()); //        starting pos  in document
-            viewEnd = _editor.viewToModel(new Point(jScrollPane1.getViewport().getViewPosition().x,
-                    jScrollPane1.getViewport().getViewPosition().y + jScrollPane1.getViewport().getExtentSize().height));
-// end pos in doc
 
-// translate offsets to lines
+            // translate offsets to lines
             Document doc = _editor.getDocument();
             int startline = doc.getDefaultRootElement().getElementIndex(viewStart) + 1;
             int endline = doc.getDefaultRootElement().getElementIndex(viewEnd) + 1;

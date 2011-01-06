@@ -7,7 +7,6 @@ import java.awt.event.ActionListener;
 import java.util.HashMap;
 import javax.swing.DefaultSyntaxColorizer.RegExpHashMap;
 import javax.swing.text.BadLocationException;
-import javax.swing.text.PlainDocument;
 import static javax.swing.Common.*;
 
 /**
@@ -29,7 +28,7 @@ public class CodeEditTest {
         syntax.put("catch", Color.BLUE);
 
         final CodeEditorPane edit = new CodeEditorPane();
-
+        
         edit.setKeywordColor(syntax);
 
         HashMap<String, String> help = new HashMap<String, String>();
