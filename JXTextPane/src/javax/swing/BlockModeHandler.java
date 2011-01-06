@@ -610,7 +610,6 @@ public class BlockModeHandler extends DocumentFilter implements ClipboardOwner {
         }
 
         public Shape paintLayer(Graphics g, int offs0, int offs1, Shape bounds, JTextComponent c, View view) {
-            System.err.print(".");
             g.setColor(color == null ? c.getSelectionColor() : color);
 
             Rectangle alloc = null;
