@@ -116,29 +116,6 @@ public class DefaultSyntaxColorizer extends SyntaxColorizer {
 
     @Override
     public void insertString(DocumentFilter.FilterBypass b, int offset, String str, AttributeSet a) throws BadLocationException {
-        int caret_offset = 0;
-        if (str.length() == 1) {//to avoid when str does not come from user: it crashes if 4096 buffer starts with a '('
-            if (str.charAt(0) == '{') {
-                str = "{}";
-                caret_offset = -1;
-            } else if (str.charAt(0) == '(') {
-                str = "()";
-                caret_offset = -1;
-            } /*else if (str.charAt(0) == '<') {
-                str = "<>";
-                caret_offset = -1;
-            } */else if (str.charAt(0) == '[') {
-                str = "[]";
-                caret_offset = -1;
-            } else if (str.charAt(0) == '\'') {
-                str = "''";
-                caret_offset = -1;
-            } else if (str.charAt(0) == '"') {
-                str = "\"\"";
-                caret_offset = -1;
-            }
-        }
-
         b.insertString(offset, str, a);
         if (undo != null) {
             doc.removeUndoableEditListener(undo);
@@ -146,10 +123,6 @@ public class DefaultSyntaxColorizer extends SyntaxColorizer {
             doc.addUndoableEditListener(undo);
         } else {
             processChangedLines(offset, str.length());
-        }
-
-        if (caret_offset != 0) {
-            component.setCaretPosition(component.getCaretPosition() + caret_offset);
         }
     }
 
@@ -159,7 +132,13 @@ public class DefaultSyntaxColorizer extends SyntaxColorizer {
     @Override
     public void remove(DocumentFilter.FilterBypass b, int offset, int length) throws BadLocationException {
         b.remove(offset, length);
-        processChangedLines(offset, 0);
+        if (undo != null) {
+            doc.removeUndoableEditListener(undo);
+            processChangedLines(offset, 0);
+            doc.addUndoableEditListener(undo);
+        } else {
+            processChangedLines(offset, 0);
+        }
     }
 
     @Override

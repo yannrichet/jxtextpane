@@ -19,7 +19,9 @@ public class DocumentFilterChain extends DocumentFilter {
 
     public DocumentFilterChain(DocumentFilter... c) {
         for (DocumentFilter documentFilter : c) {
-            chain.add(documentFilter);
+            if (documentFilter != null) {
+                chain.add(documentFilter);
+            }
         }
         buildRussianDoll();
     }

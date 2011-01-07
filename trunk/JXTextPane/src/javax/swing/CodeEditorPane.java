@@ -97,6 +97,7 @@ public class CodeEditorPane extends LineNumbersTextPane {
     public class CodeHighlighter implements CaretListener {
 
         public void updateHighlights() {
+            int nh = 0;
             if (caret_line) {
                 if (caret_line_start >= 0) {
                     if (reset_font_height) {
@@ -109,6 +110,7 @@ public class CodeEditorPane extends LineNumbersTextPane {
                     }
                     try {
                         highlight_width = getHighlighter().addHighlight(caret_line_start, caret_line_end, painter_width);
+                        nh++;
                     } catch (BadLocationException ex) {
                         ex.printStackTrace();
                     }
@@ -126,6 +128,7 @@ public class CodeEditorPane extends LineNumbersTextPane {
                     }
                     try {
                         highlight_brace = getHighlighter().addHighlight(caret_brace_start, caret_brace_end, painter_brace);
+                        nh++;
                     } catch (BadLocationException ex) {
                         ex.printStackTrace();
                     }
@@ -139,6 +142,9 @@ public class CodeEditorPane extends LineNumbersTextPane {
                         highlight_brace = null;
                     }
                 }
+            }
+            if (blockDocumentFilter != null) {
+                blockDocumentFilter.setTailHighlights(nh);
             }
         }
 
@@ -338,7 +344,9 @@ public class CodeEditorPane extends LineNumbersTextPane {
         addCaretListener(new CodeHighlighter());
 
         blockDocumentFilter = new BlockModeHandler(this);
-        blockDocumentFilter.setTailHighlights(getSpecializedHighlights());
+        blockDocumentFilter.setTailHighlights(1);
+
+        braceCompleter = new BraceCompletion(this, bracesToComplete);
     }
 
     @Override
@@ -474,9 +482,7 @@ public class CodeEditorPane extends LineNumbersTextPane {
      */
     public void setCaretLine(boolean caret_line) {
         this.caret_line = caret_line;
-        if (blockDocumentFilter != null) {
-            blockDocumentFilter.setTailHighlights(getSpecializedHighlights());
-        }
+
     }
 
     /**
@@ -491,20 +497,6 @@ public class CodeEditorPane extends LineNumbersTextPane {
      */
     public void setCaretBrace(boolean caret_brace) {
         this.caret_brace = caret_brace;
-        if (blockDocumentFilter != null) {
-            blockDocumentFilter.setTailHighlights(getSpecializedHighlights());
-        }
-    }
-
-    int getSpecializedHighlights() {
-        int n = 0;
-        if (isCaretBrace()) {
-            n++;
-        }
-        if (isCaretLine()) {
-            n++;
-        }
-        return n;
     }
     public Highlighter.HighlightPainter painter_width = new ComponentWidthHighlightPainter(caret_line_color);
     public Object highlight_width;
@@ -555,20 +547,30 @@ public class CodeEditorPane extends LineNumbersTextPane {
     }
     public BlockModeHandler blockDocumentFilter;
     public SyntaxColorizer syntaxDocumentFilter;
+    public BraceCompletion braceCompleter;
+    public char[][] bracesToComplete = BraceCompletion.DEFAULT_BRACES;
+
+    public void setBracesToComplete(char[][] bracesToComplete) {
+        this.bracesToComplete = bracesToComplete;
+        braceCompleter = new BraceCompletion(this, bracesToComplete);
+        updateDocumentFilter();
+    }
 
     protected SyntaxColorizer buildSyntaxColorizer(HashMap<String, Color> keywords) {
         return new DefaultSyntaxColorizer(this, keywords);
     }
 
     public void setKeywordColor(HashMap<String, Color> keywords) {
-        blockDocumentFilter = new BlockModeHandler(this);
-        blockDocumentFilter.setTailHighlights(getSpecializedHighlights());
         if (keywords == null) {
-            ((AbstractDocument) this.getDocument()).setDocumentFilter(blockDocumentFilter);
+            syntaxDocumentFilter = null;
         } else {
             syntaxDocumentFilter = buildSyntaxColorizer(keywords);
-            ((AbstractDocument) this.getDocument()).setDocumentFilter(new DocumentFilterChain(syntaxDocumentFilter, blockDocumentFilter));
         }
+        updateDocumentFilter();
+    }
+
+    protected void updateDocumentFilter() {
+        ((AbstractDocument) this.getDocument()).setDocumentFilter(new DocumentFilterChain(braceCompleter, syntaxDocumentFilter, blockDocumentFilter));
     }
 
     public void setKeywordHelp(HashMap<String, String> keywords) {
