@@ -97,9 +97,9 @@ public class BlockModeHandler extends DocumentFilter implements ClipboardOwner {
 
     /**Method to override for changing block mode key*/
     boolean isBlockModeKeyEvent(KeyEvent e) {
-        return e.isAltDown() && !e.isAltGraphDown() && !e.isControlDown();
+        return e.getKeyChar() == 'c' && e.isAltDown() && !e.isAltGraphDown() && !e.isControlDown();
     }
-    
+
     void resetCopy() {
         final Action copy = component.getActionMap().get("copy");
         //printActions();
@@ -293,6 +293,11 @@ public class BlockModeHandler extends DocumentFilter implements ClipboardOwner {
                 for (int i = 0; i < cnt - tailHighlights; i++) {//do not use the last highlight dedicated to highlight current line !!! Ok, that's not clean :)
                     int start = selections[i].getStartOffset();
                     int end = selections[i].getEndOffset();
+                    if (start > end) {
+                        int tmp = start;
+                        start = end;
+                        end = tmp;
+                    }
                     sb.append(component.getText(start, end - start));
                     sb.append('\n');
                 }
@@ -315,6 +320,11 @@ public class BlockModeHandler extends DocumentFilter implements ClipboardOwner {
                 for (int i = 0; i < cnt - tailHighlights; i++) {//do not use the last highlight dedicated to highlight current line !!! Ok, that's not clean :)
                     int start = selections[i].getStartOffset();
                     int end = selections[i].getEndOffset();
+                    if (start > end) {
+                        int tmp = start;
+                        start = end;
+                        end = tmp;
+                    }
                     component.getDocument().remove(start, end - start);
                 }
             } catch (Exception ex) {
@@ -337,6 +347,11 @@ public class BlockModeHandler extends DocumentFilter implements ClipboardOwner {
                     for (int i = 0; i < cnt - tailHighlights; i++) {//do not use the last highlight dedicated to highlight current line !!! Ok, that's not clean :)
                         int start = selections[i].getStartOffset();
                         int end = selections[i].getEndOffset();
+                        if (start > end) {
+                            int tmp = start;
+                            start = end;
+                            end = tmp;
+                        }
                         if (start != end) {
                             component.getDocument().remove(start, end - start);
                         }
@@ -440,6 +455,11 @@ public class BlockModeHandler extends DocumentFilter implements ClipboardOwner {
                 for (int i = 0; i < cnt - tailHighlights; i++) {//do not use the last highlight dedicated to highlight current line !!! Ok, that's not clean :)
                     int start = selections[i].getStartOffset();
                     int end = selections[i].getEndOffset();
+                    if (start > end) {
+                        int tmp = start;
+                        start = end;
+                        end = tmp;
+                    }
                     super_replace(b, start, end - start, text, attrs);
                 }
             } catch (Exception ex) {
