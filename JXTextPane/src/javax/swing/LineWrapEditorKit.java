@@ -13,9 +13,13 @@ import javax.swing.text.View;
 import javax.swing.text.ViewFactory;
 
 /**
- @author richet (heavily inspired by many searches on the web)*/
+@author richet (heavily inspired by many searches on the web)*/
 public class LineWrapEditorKit extends StyledEditorKit {
 
+    private static final char EOL_char = '\n';
+    private static final String EOL = "\n";
+    private static final String EOL_CR = "\r";
+    private static final String EOL_CRLF = "\r\n";
     private boolean wrap = false;
     int number_of_lines;
     protected static ViewFactory defaultFactory;
@@ -159,10 +163,10 @@ public class LineWrapEditorKit extends StyledEditorKit {
                         if (lastWasCR) {
                             isCR = true;
                             if (counter == 0) {
-                                doc.insertString(pos, "\n", attr);
+                                doc.insertString(pos, EOL, attr);
                                 pos++;
                             } else {
-                                buff[counter - 1] = '\n';
+                                buff[counter - 1] = EOL_char;
                             }
                         } else {
                             lastWasCR = true;
@@ -187,10 +191,10 @@ public class LineWrapEditorKit extends StyledEditorKit {
                         if (lastWasCR) {
                             isCR = true;
                             if (counter == 0) {
-                                doc.insertString(pos, "\n", attr);
+                                doc.insertString(pos, EOL, attr);
                                 pos++;
                             } else {
-                                buff[counter - 1] = '\n';
+                                buff[counter - 1] = EOL_char;
                             }
                             lastWasCR = false;
                         }
@@ -212,20 +216,18 @@ public class LineWrapEditorKit extends StyledEditorKit {
             }
         }
         if (lastWasCR) {
-            doc.insertString(pos, "\n", attr);
+            doc.insertString(pos, EOL, attr);
             isCR = true;
         }
         if (wasEmpty) {
             if (isCRLF) {
-                doc.putProperty(EndOfLineStringProperty, "\r\n");
+                doc.putProperty(EndOfLineStringProperty, EOL_CRLF);
             } else if (isCR) {
-                doc.putProperty(EndOfLineStringProperty, "\r");
+                doc.putProperty(EndOfLineStringProperty, EOL_CR);
             } else {
-                doc.putProperty(EndOfLineStringProperty, "\n");
+                doc.putProperty(EndOfLineStringProperty, EOL);
             }
         }
     }
-
-    
 }
 

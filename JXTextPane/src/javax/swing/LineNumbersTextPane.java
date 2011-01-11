@@ -33,18 +33,6 @@ public class LineNumbersTextPane extends JXTextPane {
         return offset;
     }
 
-    @Override
-    public void paint(Graphics g) {
-        super.paint(g);
-        // We need to properly convert the points to match the viewport
-        // Read docs for viewport
-        viewStart = viewToModel(jScrollPane1.getViewport().getViewPosition());
-        // starting pos  in document
-        viewEnd = viewToModel(new Point(jScrollPane1.getViewport().getViewPosition().x,
-                jScrollPane1.getViewport().getViewPosition().y + jScrollPane1.getViewport().getExtentSize().height));
-        // end pos in doc
-    }
-
     public int getNumberOfLines() {
         return ((LineWrapEditorKit) getEditorKit()).number_of_lines;
     }
@@ -125,23 +113,26 @@ public class LineNumbersTextPane extends JXTextPane {
     public void setText(String t) {
         super.setText(t);
         updateLineNumberDivider();
+        updateLineNumberView();
     }
 
     public void updateLineNumberDivider() {
         if (!isDisplayLineNumbers()) {
             return;
         }
-        /*int[] widths = linenumbers._editor.getFontMetrics(linenumbers._editor.getFont()).getWidths();
-        int width = 0;
-        for (int i : widths) {
-        width = Math.max(width, i);
-        }  */
         int width = linenumbers._editor.getFontMetrics(linenumbers._editor.getFont()).charWidth('0');
         int div = (int) (width * (Math.floor(Math.log10(((LineWrapEditorKit) getEditorKit()).number_of_lines)) + 3));
         jSplitPane1.setDividerLocation(div);
     }
 
     public void updateLineNumberView() {
+        // We need to properly convert the points to match the viewport
+        // Read docs for viewport
+        viewStart = viewToModel(jScrollPane1.getViewport().getViewPosition());
+        // starting pos  in document
+        viewEnd = viewToModel(new Point(jScrollPane1.getViewport().getViewPosition().x,
+                jScrollPane1.getViewport().getViewPosition().y + jScrollPane1.getViewport().getExtentSize().height));
+        // end pos in doc
         if (!isDisplayLineNumbers()) {
             return;
         }

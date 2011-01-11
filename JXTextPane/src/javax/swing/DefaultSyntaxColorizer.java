@@ -42,6 +42,7 @@ public class DefaultSyntaxColorizer extends SyntaxColorizer {
 
 //TODO setKeywordBackgroundColor, setKeywordItalic, setKeywordBold, setKeywordUnderline
     public void setKeywordColor(HashMap<String, Color> keywords) {
+        colors = null;
         colors = new HashMap<Color, MutableAttributeSet>();
         this.keywords = keywords;
 
