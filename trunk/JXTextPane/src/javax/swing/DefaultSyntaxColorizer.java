@@ -508,9 +508,7 @@ public class DefaultSyntaxColorizer extends SyntaxColorizer {
      *  Override for other languages
      */
     public boolean isQuoteDelimiter(String character) {
-        String quoteDelimiters = "\"'";
-
-        if (quoteDelimiters.indexOf(character) < 0) {
+        if (getQuotes().indexOf(character) < 0) {
             return false;
         } else {
             return true;
