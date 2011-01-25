@@ -27,8 +27,14 @@ public class CodeEditTest {
         syntax.put("cast", Color.BLUE);
         syntax.put("catch", Color.BLUE);
 
-        final CodeEditorPane edit = new CodeEditorPane();
-        
+        final CodeEditorPane edit = new CodeEditorPane() {
+
+            @Override
+            protected SyntaxColorizer buildSyntaxColorizer(HashMap<String, Color> keywords) {
+                return new OperatorsSyntaxColorizer(this, keywords);
+            }
+        };
+
         edit.setKeywordColor(syntax);
 
         HashMap<String, String> help = new HashMap<String, String>();

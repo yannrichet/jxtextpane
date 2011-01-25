@@ -8,14 +8,14 @@ import javax.swing.text.*;
 /**This DocumentFilter supports syntax dependant colorization. RegExp are available if RegExpHashMap is used to give KeyWords*/
 public class DefaultSyntaxColorizer extends SyntaxColorizer {
 
-    private StyledDocument doc;
+    protected StyledDocument doc;
     private Element rootElement;
     private boolean multiLineComment;
     private MutableAttributeSet normal;
     private MutableAttributeSet comment;
     private MutableAttributeSet quote;
-    private HashMap<String, Color> keywords;
-    private HashMap<Color, MutableAttributeSet> colors;
+    protected HashMap<String, Color> keywords;
+    protected HashMap<Color, MutableAttributeSet> colors;
     UndoableEditListener undo;
     JXTextPane component;
 
@@ -368,7 +368,7 @@ public class DefaultSyntaxColorizer extends SyntaxColorizer {
     /*
      *	Parse the line for tokens to highlight
      */
-    private void checkForTokens(String content, int startOffset, int endOffset) {
+    protected void checkForTokens(String content, int startOffset, int endOffset) {
         while (startOffset <= endOffset) {
             //  skip the delimiters to find the start of a new token
 
@@ -393,7 +393,7 @@ public class DefaultSyntaxColorizer extends SyntaxColorizer {
     /*
      *
      */
-    private int getQuoteToken(String content, int startOffset, int endOffset) {
+    protected int getQuoteToken(String content, int startOffset, int endOffset) {
         String quoteDelimiter = content.substring(startOffset, startOffset + 1);
         String escapeString = getEscapeString(quoteDelimiter);
 
@@ -427,7 +427,7 @@ public class DefaultSyntaxColorizer extends SyntaxColorizer {
     /*
      *
      */
-    private int getOtherToken(String content, int startOffset, int endOffset) {
+    protected int getOtherToken(String content, int startOffset, int endOffset) {
         int endOfToken = startOffset + 1;
 
         while (endOfToken <= endOffset) {
