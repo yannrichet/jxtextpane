@@ -5,7 +5,9 @@ import java.util.*;
 import javax.swing.event.UndoableEditListener;
 import javax.swing.text.*;
 
-/**This DocumentFilter supports syntax dependant colorization. RegExp are available if RegExpHashMap is used to give KeyWords*/
+/**This DocumentFilter supports syntax dependant colorization. RegExp are available if RegExpHashMap is used to give KeyWords
+ * Yous should consider to simplify this class for better performance.
+ */
 public class DefaultSyntaxColorizer extends SyntaxColorizer {
 
     protected StyledDocument doc;
@@ -14,6 +16,8 @@ public class DefaultSyntaxColorizer extends SyntaxColorizer {
     private MutableAttributeSet normal;
     private MutableAttributeSet comment;
     private MutableAttributeSet quote;
+    private MutableAttributeSet operator;
+    private MutableAttributeSet numbers;
     protected HashMap<String, Color> keywords;
     protected HashMap<Color, MutableAttributeSet> colors;
     UndoableEditListener undo;
@@ -35,7 +39,13 @@ public class DefaultSyntaxColorizer extends SyntaxColorizer {
         StyleConstants.setItalic(comment, true);
 
         quote = new SimpleAttributeSet();
-        StyleConstants.setForeground(quote, Color.red);
+        StyleConstants.setForeground(quote, Color.orange);
+
+        operator = new SimpleAttributeSet();
+        StyleConstants.setForeground(operator, Color.blue);
+
+        numbers = new SimpleAttributeSet();
+        StyleConstants.setForeground(numbers, Color.red);
 
         setKeywordColor(keywords);
     }
@@ -372,7 +382,16 @@ public class DefaultSyntaxColorizer extends SyntaxColorizer {
         while (startOffset <= endOffset) {
             //  skip the delimiters to find the start of a new token
 
-            while (isTokenSeparator(content.charAt(startOffset))) {
+            /*while (isTokenSeparator(content.charAt(startOffset))) {
+            if (startOffset < endOffset) {
+            if (isOperator(content.charAt(startOffset))) {
+            doc.setCharacterAttributes(startOffset, 1, operator, false);
+            }
+            startOffset++;
+            } else {
+            return;
+            }
+            }*/ while (isWhiteSpace(content.charAt(startOffset))) {
                 if (startOffset < endOffset) {
                     startOffset++;
                 } else {
@@ -381,8 +400,7 @@ public class DefaultSyntaxColorizer extends SyntaxColorizer {
             }
 
             //  Extract and process the entire token
-
-            if (isQuoteDelimiter(content.substring(startOffset, startOffset + 1))) {
+            if (isQuoteDelimiter(content.charAt(startOffset))) {
                 startOffset = getQuoteToken(content, startOffset, endOffset);
             } else {
                 startOffset = getOtherToken(content, startOffset, endOffset);
@@ -424,12 +442,36 @@ public class DefaultSyntaxColorizer extends SyntaxColorizer {
         return endOfQuote + 1;
     }
 
-    /*
-     *
-     */
     protected int getOtherToken(String content, int startOffset, int endOffset) {
-        int endOfToken = startOffset + 1;
+        if (isStartNumber(content.charAt(startOffset)) && !(startOffset > 0 && isNumberChar(content.charAt(startOffset - 1)))) {
+            if (endOffset > startOffset + 1) {
+                if (isNumberChar(content.charAt(startOffset + 1)) && (startOffset > 0 && !isNumberChar(content.charAt(startOffset - 1)))) {
+                    int endOfToken = startOffset + 1;
+                    while (endOfToken <= endOffset && isNumberChar(content.charAt(endOfToken))) {
+                        endOfToken++;
+                    }
+                    doc.setCharacterAttributes(startOffset, endOfToken - startOffset, numbers, false);
+                    return endOfToken;
+                } else {
+                    if (isDigit(content.charAt(startOffset))) {
+                        doc.setCharacterAttributes(startOffset, 1, numbers, false);
+                        return startOffset + 1;
+                    }
+                }
+            } else {
+                if (isDigit(content.charAt(startOffset))) {
+                    doc.setCharacterAttributes(startOffset, 1, numbers, false);
+                    return startOffset + 1;
+                }
+            }
+        }
 
+        if (isOperator(content.charAt(startOffset))) {
+            doc.setCharacterAttributes(startOffset, 1, operator, false);
+            return startOffset + 1;
+        }
+
+        int endOfToken = startOffset + 1;
         while (endOfToken <= endOffset) {
             if (isTokenSeparator(content.charAt(endOfToken))) {
                 break;
@@ -497,17 +539,53 @@ public class DefaultSyntaxColorizer extends SyntaxColorizer {
      *  Override for other languages
      */
     public boolean isTokenSeparator(char character) {
-        if (Character.isWhitespace(character) || getOperands().indexOf(character) != -1) {
+        return isWhiteSpace(character) || isOperator(character);
+    }
+
+    public boolean isWhiteSpace(char character) {
+        return Character.isWhitespace(character);
+    }
+
+    public boolean isCharacter(char character) {
+        if (Character.isLetter(character) || character == '_') {
             return true;
         } else {
             return false;
         }
     }
 
+    public boolean isStartNumber(char c) {
+        return isDigit(c) || c == '-' || c == '+' || c == '.';
+    }
+
+    public boolean isNumberChar(char c) {
+        return isDigit(c) || c == '.';
+    }
+
+    public boolean isOperator(char character) {
+        if (getOperands().indexOf(character) >= 0) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    public boolean isDigit(char c) {
+        return Character.isDigit(c);
+    }
+
     /*
      *  Override for other languages
      */
     public boolean isQuoteDelimiter(String character) {
+        if (getQuotes().indexOf(character) < 0) {
+            return false;
+        } else {
+            return true;
+        }
+    }
+
+    public boolean isQuoteDelimiter(char character) {
         if (getQuotes().indexOf(character) < 0) {
             return false;
         } else {
@@ -561,10 +639,10 @@ public class DefaultSyntaxColorizer extends SyntaxColorizer {
     StringBuffer whiteSpace = new StringBuffer();
     int line = rootElement.getElementIndex(offset);
     int i = rootElement.getElement(line).getStartOffset();
-
+    
     while (true) {
     String temp = doc.getText(i, 1);
-
+    
     if (temp.equals(" ") || temp.equals("\t")) {
     whiteSpace.append(temp);
     i++;
@@ -572,7 +650,7 @@ public class DefaultSyntaxColorizer extends SyntaxColorizer {
     break;
     }
     }
-
+    
     return "{\n" + whiteSpace.toString() + "\t\n" + whiteSpace.toString() + "}";
     }*/
 }
