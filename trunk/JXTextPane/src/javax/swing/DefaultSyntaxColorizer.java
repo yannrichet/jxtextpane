@@ -382,16 +382,7 @@ public class DefaultSyntaxColorizer extends SyntaxColorizer {
         while (startOffset <= endOffset) {
             //  skip the delimiters to find the start of a new token
 
-            /*while (isTokenSeparator(content.charAt(startOffset))) {
-            if (startOffset < endOffset) {
-            if (isOperator(content.charAt(startOffset))) {
-            doc.setCharacterAttributes(startOffset, 1, operator, false);
-            }
-            startOffset++;
-            } else {
-            return;
-            }
-            }*/ while (isWhiteSpace(content.charAt(startOffset))) {
+            while (isWhiteSpace(content.charAt(startOffset))) {
                 if (startOffset < endOffset) {
                     startOffset++;
                 } else {
@@ -543,7 +534,7 @@ public class DefaultSyntaxColorizer extends SyntaxColorizer {
     }
 
     public boolean isWhiteSpace(char character) {
-        return Character.isWhitespace(character);
+        return Character.isSpaceChar(character);
     }
 
     public boolean isCharacter(char character) {
