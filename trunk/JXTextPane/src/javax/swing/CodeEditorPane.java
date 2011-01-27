@@ -11,6 +11,7 @@ import java.awt.event.KeyEvent;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.Map;
 import javax.swing.event.CaretEvent;
 import javax.swing.event.CaretListener;
 import javax.swing.event.MenuKeyEvent;
@@ -401,7 +402,7 @@ public class CodeEditorPane extends LineNumbersTextPane {
         MenuElement[] path = new MenuElement[2];
         int alreadywriten;
 
-        public KeyWordItem(final String name, HashMap<String, String> dictionnary, JPopupMenu parent, final int alreadywriten) {
+        public KeyWordItem(final String name, Map<String, String> dictionnary, JPopupMenu parent, final int alreadywriten) {
             super(new AbstractAction(name) {
 
                 public void actionPerformed(ActionEvent e) {
@@ -444,7 +445,7 @@ public class CodeEditorPane extends LineNumbersTextPane {
 
         }
 
-        protected void createHelpMenu(String name, HashMap<String, String> dictionnary) {
+        protected void createHelpMenu(String name, Map<String, String> dictionnary) {
             if (dictionnary != null && name != null) {
                 if (dictionnary.get(name) != null && dictionnary.get(name).length() > 0) {
                     add(buildHelpMenu(dictionnary.get(name)));
