@@ -194,7 +194,7 @@ public class LineNumbersTextPane extends JXTextPane {
             try {
                 starting_y = _editor.modelToView(viewStart).y - jScrollPane1.getViewport().getViewPosition().y + fontHeight - fontDesc;
             } catch (BadLocationException e1) {
-                e1.printStackTrace();
+                //e1.printStackTrace();
             } catch (NullPointerException e) {
             }
 
