@@ -434,15 +434,17 @@ public class DefaultSyntaxColorizer extends SyntaxColorizer {
     }
 
     protected int getOtherToken(String content, int startOffset, int endOffset) {
-        if (isStartNumber(content.charAt(startOffset)) && !(startOffset > 0 && isNumberChar(content.charAt(startOffset - 1)))) {
+        if (isStartNumber(content.charAt(startOffset)) && (startOffset == 0 || !(isLetter(content.charAt(startOffset - 1))||isNumber(content.charAt(startOffset - 1))))) {//to avoid sdfgdfg<.>654654
             if (endOffset > startOffset + 1) {
-                if (isNumberChar(content.charAt(startOffset + 1)) && (startOffset > 0 && !isNumberChar(content.charAt(startOffset - 1)))) {
+                if (isNumber(content.charAt(startOffset + 1))) {//to avoid 65465454<.>rsdgdrg
                     int endOfToken = startOffset + 1;
-                    while (endOfToken <= endOffset && isNumberChar(content.charAt(endOfToken))) {
+                    while (endOfToken <= endOffset && isNumber(content.charAt(endOfToken))) {
                         endOfToken++;
                     }
-                    doc.setCharacterAttributes(startOffset, endOfToken - startOffset, numbers, false);
-                    return endOfToken;
+                    if (endOfToken == endOffset || !isLetter(content.charAt(endOfToken))) {// to avoid 65465<4>zertert
+                        doc.setCharacterAttributes(startOffset, endOfToken - startOffset, numbers, false);
+                        return endOfToken;
+                    }
                 } else {
                     if (isDigit(content.charAt(startOffset))) {
                         doc.setCharacterAttributes(startOffset, 1, numbers, false);
@@ -463,7 +465,7 @@ public class DefaultSyntaxColorizer extends SyntaxColorizer {
         }
 
         int endOfToken = startOffset + 1;
-        while (endOfToken <= endOffset) {
+        while (endOfToken <= endOffset) {// to reach end of token
             if (isTokenSeparator(content.charAt(endOfToken))) {
                 break;
             }
@@ -534,10 +536,10 @@ public class DefaultSyntaxColorizer extends SyntaxColorizer {
     }
 
     public boolean isWhiteSpace(char character) {
-        return Character.isSpaceChar(character) || character=='\u0009';
+        return Character.isSpaceChar(character) || character == '\u0009';
     }
 
-    public boolean isCharacter(char character) {
+    public boolean isLetter(char character) {
         if (Character.isLetter(character) || character == '_') {
             return true;
         } else {
@@ -549,8 +551,8 @@ public class DefaultSyntaxColorizer extends SyntaxColorizer {
         return isDigit(c) || c == '-' || c == '+' || c == '.';
     }
 
-    public boolean isNumberChar(char c) {
-        return isDigit(c) || c == '.';
+    public boolean isNumber(char c) {
+        return isDigit(c) || c == '.' /*|| c == 'E'*/;
     }
 
     public boolean isOperator(char character) {

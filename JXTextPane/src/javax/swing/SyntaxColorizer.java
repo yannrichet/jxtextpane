@@ -8,7 +8,7 @@ import javax.swing.text.DocumentFilter;
  */
 public abstract class SyntaxColorizer extends DocumentFilter {
 
-    public final static String ALL_OPERANDS = ";:.!?{}()[]<>+-*/=\\%&|^~$@#";
+    public final static String ALL_OPERANDS = ",;:.!?{}()[]<>+-*/=\\%&|^~$@#";
     private String operands = ALL_OPERANDS;
     public final static String ALL_QUOTES = "'\"`";
     private String quotes = ALL_QUOTES;
