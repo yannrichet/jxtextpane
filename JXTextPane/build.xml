@@ -42,22 +42,22 @@
         <jar jarfile="${dist}/${ant.project.name}.jar" basedir="${build}" />
     </target>
 
-    <target name="test" depends="compile">
-        <javac classpath="${lib}/swingx-1.6.jar:junit4.jar" deprecation="true" target="1.6" srcdir="${test}" destdir="${build}" debug="true" />
-        <java  jvm="java" classpath="${build}:${lib}/swingx-1.6.jar:junit4.jar" classname="javax.swing.CodeEditTest" fork="true"  >
-            <assertions>
-                <enable/>
-            </assertions>
-        </java>
-    </target>
-
     <target name="profile" depends="compile">
         <javac classpath="${lib}/swingx-1.6.jar:junit4.jar" deprecation="true" target="1.6" srcdir="${test}" destdir="${build}" debug="true" />
         <java  jvm="java" classpath="${build}:${lib}/swingx-1.6.jar:junit4.jar" classname="javax.swing.CodeEditTest" fork="true"  >
             <assertions>
                 <enable/>
             </assertions>
-            <jvmarg value="-agentpath:/home/richet/opt/netbeans-6.8/profiler3/lib/deployed/jdk16/linux/libprofilerinterface.so=/home/richet/opt/netbeans-6.8/profiler3/lib,5140" />
+            <jvmarg value="-agentpath:/home/richet/opt/netbeans-6.8/profiler3/lib/deployed/jdk16/linux-amd64/libprofilerinterface.so=/home/richet/opt/netbeans-6.8/profiler3/lib,5140" />
+        </java>
+    </target>
+
+    <target name="test" depends="compile">
+        <javac classpath="${lib}/swingx-1.6.jar:junit4.jar" deprecation="true" target="1.6" srcdir="${test}" destdir="${build}" debug="true" />
+        <java  jvm="java" classpath="${build}:${lib}/swingx-1.6.jar:junit4.jar" classname="javax.swing.CodeEditTest" fork="true"  >
+            <assertions>
+                <enable/>
+            </assertions>
         </java>
     </target>
 
