@@ -72,7 +72,7 @@ public class CodeEditTest {
             }
         });
 
-        edit.setText(read("src/javax/swing/JXTextPane.java"));
+        edit.setText(".654654654\n0.65465465\nzdzertert.6544654\n654654.zefzer\n 32132.654\n1E10\n-6546.645\n+dffds\n-sdfsdf\n-65465sdfgdfg\n-654654 sdfgsdfg\n654654-654654\n\n"+read("src/javax/swing/JXTextPane.java"));
 
         edit.setVerticalLineAtPos(80);
 
