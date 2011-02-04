@@ -434,15 +434,15 @@ public class DefaultSyntaxColorizer extends SyntaxColorizer {
     }
 
     protected int getOtherToken(String content, int startOffset, int endOffset) {
-        if (isStartNumber(content.charAt(startOffset)) && (startOffset == 0 || !(isLetter(content.charAt(startOffset - 1))||isNumber(content.charAt(startOffset - 1))))) {//to avoid sdfgdfg<.>654654
+        if (isStartNumber(content.charAt(startOffset)) && (startOffset == 0 || !(isLetter(content.charAt(startOffset - 1)) || isNumber(content.charAt(startOffset - 1))))) {//to avoid sdfgdfg<.>654654
             if (endOffset > startOffset + 1) {
                 if (isNumber(content.charAt(startOffset + 1))) {//to avoid 65465454<.>rsdgdrg
                     int endOfToken = startOffset + 1;
-                    while (endOfToken <= endOffset && isNumber(content.charAt(endOfToken))) {
+                    while (endOfToken < endOffset && isNumber(content.charAt(endOfToken))) {
                         endOfToken++;
                     }
                     if (endOfToken == endOffset || !isLetter(content.charAt(endOfToken))) {// to avoid 65465<4>zertert
-                        doc.setCharacterAttributes(startOffset, endOfToken - startOffset, numbers, false);
+                        doc.setCharacterAttributes(startOffset, endOfToken - startOffset + 1, numbers, false);
                         return endOfToken;
                     }
                 } else {
