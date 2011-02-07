@@ -121,7 +121,7 @@ public class LineNumbersTextPane extends JXTextPane {
             return;
         }
         int width = linenumbers._editor.getFontMetrics(linenumbers._editor.getFont()).charWidth('0');
-        int div = (int) (width * (Math.floor(Math.log10(((LineWrapEditorKit) getEditorKit()).number_of_lines)) + 3));
+        int div = (int) (width * (Math.floor(Math.log10(((LineWrapEditorKit) getEditorKit()).number_of_lines + 1)) + 3));
         jSplitPane1.setDividerLocation(div);
     }
 
