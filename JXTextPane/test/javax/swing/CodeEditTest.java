@@ -1,5 +1,6 @@
 package javax.swing;
 
+import java.util.Calendar;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.event.ActionEvent;
@@ -15,6 +16,17 @@ import static javax.swing.Common.*;
  */
 public class CodeEditTest {
 
+    static double tic;
+
+    public static void tic() {
+        tic = Calendar.getInstance().getTimeInMillis();
+    }
+
+    public static void toc() {
+        double toc = Calendar.getInstance().getTimeInMillis();
+        System.err.println("time elapsed: " + (toc - tic) / 1000.0);
+    }
+
     public static void main(String a[]) throws BadLocationException, Exception {
         final HashMap<String, Color> syntax = new RegExpHashMap();
         syntax.put("imp(\\w{3})", Color.RED);
@@ -26,7 +38,7 @@ public class CodeEditTest {
         syntax.put("case", Color.BLUE);
         syntax.put("cast", Color.BLUE);
         syntax.put("catch", Color.BLUE);
-
+        tic();
         final CodeEditorPane edit = new CodeEditorPane();
 
         edit.setKeywordColor(syntax);
@@ -72,7 +84,7 @@ public class CodeEditTest {
             }
         });
 
-        edit.setText(".654654654\n0.65465465\nzdzertert.6544654\n654654.zefzer\n 32132.654\n1E10\n-6546.645\n+dffds\n-sdfsdf\n-65465sdfgdfg\n-654654 sdfgsdfg\n654654-654654\n\n"+read("src/javax/swing/JXTextPane.java"));
+        edit.setText(".654654654\n0.65465465\nzdzertert.6544654\n654654.zefzer\n 32132.654\n1E10\n-6546.645\n+dffds\n-sdfsdf\n-65465sdfgdfg\n-654654 sdfgsdfg\n654654-654654\n\n" + read("src/javax/swing/JXTextPane.java"));
 
         edit.setVerticalLineAtPos(80);
 
@@ -82,5 +94,6 @@ public class CodeEditTest {
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setSize(800, 300);
         frame.setVisible(true);
+        toc();
     }
 }
