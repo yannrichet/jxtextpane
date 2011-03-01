@@ -76,7 +76,13 @@ public class CodeEditTest {
 
             public void actionPerformed(ActionEvent e) {
                 try {
-                    edit.setText(read("src/javax/swing/JXTextPane.java"));
+                    String content = read("/home/richet/tictoctest.txt");
+                    content = content+content;
+                    content = content+content;
+                    tic();
+                    edit.setText(content);
+                    toc();
+                    //edit.setText(read("src/javax/swing/JXTextPane.java"));
                 } catch (Exception ex) {
                     ex.printStackTrace();
                 }
