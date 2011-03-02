@@ -1,6 +1,7 @@
 package javax.swing;
 
 import java.awt.Container;
+import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Point;
 import java.awt.Rectangle;
@@ -163,12 +164,29 @@ public class LineNumbersTextPane extends JXTextPane {
     protected int viewStart;
     protected int viewEnd;
 
+    @Override
+    public void setFont(Font font) {
+        super.setFont(font);
+        if (linenumbers != null) {
+            linenumbers.fontChanged();
+            linenumbers.repaint();
+        }
+    }
+
     public class LineNumbersSidePane extends JPanel {
 
-        JTextComponent _editor;
+        LineNumbersTextPane _editor;
+        private boolean updateFont;
+        private int fontHeight;
+        private int fontDesc;
+        private int starting_y;
 
-        public LineNumbersSidePane(JXTextPane editor) {
+        public LineNumbersSidePane(LineNumbersTextPane editor) {
             _editor = editor;
+        }
+
+        void fontChanged() {
+            updateFont = true;
         }
 
         @Override
@@ -185,17 +203,12 @@ public class LineNumbersTextPane extends JXTextPane {
             int startline = doc.getDefaultRootElement().getElementIndex(viewStart) + 1;
             int endline = doc.getDefaultRootElement().getElementIndex(viewEnd) + 1;
 
-            g.setFont(_editor.getFont());
-
-            int fontHeight = g.getFontMetrics(_editor.getFont()).getHeight();
-            int fontDesc = g.getFontMetrics(_editor.getFont()).getDescent();
-            int starting_y = -1;
-
-            try {
-                starting_y = _editor.modelToView(viewStart).y - jScrollPane1.getViewport().getViewPosition().y + fontHeight - fontDesc;
-            } catch (BadLocationException e1) {
-                //e1.printStackTrace();
-            } catch (NullPointerException e) {
+            if (updateFont) {
+                g.setFont(_editor.getFont());
+                fontHeight = g.getFontMetrics(_editor.getFont()).getHeight();
+                fontDesc = g.getFontMetrics(_editor.getFont()).getDescent();
+                starting_y = fontHeight - fontDesc;
+                updateFont = false;
             }
 
             for (int line = startline, y = starting_y; line <= endline; y += fontHeight, line++) {
