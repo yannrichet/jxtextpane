@@ -15,7 +15,7 @@ import static javax.swing.Common.*;
  *
  * @author richet
  */
-public class SyntaxColorizerTest {
+public class SyntaxColorizerViewTest {
 
     public static void main(String a[]) throws BadLocationException {
         final HashMap syntax = new DefaultSyntaxColorizer.RegExpHashMap();
@@ -91,7 +91,7 @@ public class SyntaxColorizerTest {
                 try {
                     edit.setText(read("src/javax/swing/JXTextPane.java"));
 
-                    try {
+                    /*try {
                         Writer s = new StringWriter();
                         SyntaxHTMLWriter w = new SyntaxHTMLWriter(s, edit.getStyledDocument());
                         w.write();
@@ -99,7 +99,7 @@ public class SyntaxColorizerTest {
                         System.out.println(s.toString());
                     } catch (Exception ex) {
                         ex.printStackTrace();
-                    }
+                    }*/
                 } catch (Exception ex) {
                     ex.printStackTrace();
                 }
