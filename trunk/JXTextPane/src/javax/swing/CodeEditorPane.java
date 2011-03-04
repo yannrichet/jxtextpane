@@ -365,13 +365,13 @@ public class CodeEditorPane extends LineNumbersTextPane {
         if (help == null || help.isEmpty()) {
             return null;
         }
-        String base = "";
+        StringBuilder base = new StringBuilder();
         int i = 1;
         if (beforeCaret.length() > 0) {
             char c;
             c = beforeCaret.charAt(beforeCaret.length() - i);
             while (!syntaxDocumentFilter.isTokenSeparator(c)) {
-                base = c + base;
+                base.insert(0,c);
                 i++;
                 if (((getCaretPosition() - i) >= 0)) {
                     c = beforeCaret.charAt(beforeCaret.length() - i);
@@ -383,7 +383,7 @@ public class CodeEditorPane extends LineNumbersTextPane {
 
         LinkedList<KeyWordItem> newitems = new LinkedList<KeyWordItem>();
         for (String k : help.keySet()) {
-            if (k.startsWith(base)) {
+            if (k.startsWith(base.toString())) {
                 newitems.add(new KeyWordItem(k, help, completionMenu, i));
             }
         }
