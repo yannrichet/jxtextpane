@@ -305,9 +305,11 @@ public class DefaultSyntaxColorizer extends SyntaxColorizer {
                 if ((s = startingMultiLineComment(content, startOffset, endOffset)) > -1 && s > e) {
                     doc.setCharacterAttributes(s, endOffset - s + 1, comment, false);
                     setMultiLineComment(true);
+                    checkForTokens(content, e + getEndDelimiter().length(), s);
                     return;
                 }
-                startOffset = e + getEndDelimiter().length();
+                checkForTokens(content, e + getEndDelimiter().length(), endOffset);
+                return;
             } else {
                 doc.setCharacterAttributes(startOffset, endOffset - startOffset + 1, comment, false);
                 setMultiLineComment(true);
@@ -317,9 +319,12 @@ public class DefaultSyntaxColorizer extends SyntaxColorizer {
             if (((e = endingMultiLineComment(content, startOffset, endOffset)) > -1) && e > s) {
                 doc.setCharacterAttributes(s, e - s + getEndDelimiter().length(), comment, false);
                 setMultiLineComment(false);
-                startOffset = e + getEndDelimiter().length();
+                checkForTokens(content, startOffset, s-1);
+                checkForTokens(content, e + getEndDelimiter().length(), endOffset);
+                return;
             } else {
                 doc.setCharacterAttributes(s, endOffset - s + 1, comment, false);
+                checkForTokens(content, startOffset, s-1);
                 setMultiLineComment(true);
                 return;
             }
@@ -519,7 +524,7 @@ public class DefaultSyntaxColorizer extends SyntaxColorizer {
     }
 
     public boolean isDigit(char c) {
-        return false;//Character.isDigit(c);
+        return Character.isDigit(c);
     }
 
     /*
