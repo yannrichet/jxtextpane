@@ -77,8 +77,8 @@ public class CodeEditTest {
             public void actionPerformed(ActionEvent e) {
                 try {
                     String content = read("/home/richet/tictoctest.txt");
-                    content = content+content;
-                    content = content+content;
+                    //content = content+content;
+                    //content = content+content;
                     tic();
                     edit.setText(content);
                     toc();
