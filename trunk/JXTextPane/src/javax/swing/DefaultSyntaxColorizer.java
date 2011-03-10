@@ -206,17 +206,15 @@ public class DefaultSyntaxColorizer extends SyntaxColorizer {
 
         //  Start of comment not found, nothing to do
 
-        int startDelimiter = lastIndexOf(content, getStartDelimiter(), offset - 2);
-
+        int startDelimiter = content.lastIndexOf(getStartDelimiter(), offset);
         if (startDelimiter < 0) {
             return false;
         }
 
         //  Matching start/end of comment found, nothing to do
 
-        int endDelimiter = indexOf(content, getEndDelimiter(), startDelimiter);
-
-        if (endDelimiter < offset & endDelimiter != -1) {
+        int endDelimiter = content.indexOf(getEndDelimiter(), startDelimiter);
+        if (endDelimiter != -1 && endDelimiter < offset) {
             return false;
         }
 
@@ -233,20 +231,13 @@ public class DefaultSyntaxColorizer extends SyntaxColorizer {
         int offset = rootElement.getElement(line).getEndOffset();
 
         //  End of comment not found, nothing to do
-
-        int endDelimiter = indexOf(content, getEndDelimiter(), offset);
-
+        int endDelimiter = content.indexOf(getEndDelimiter(), offset);
         if (endDelimiter < 0) {
+            doc.setCharacterAttributes(offset, content.length() - offset + getEndDelimiter().length(), comment, false);
             return;
         }
 
-        //  Matching start/end of comment found, comment the lines
-
-        int startDelimiter = lastIndexOf(content, getStartDelimiter(), endDelimiter);
-
-        if (startDelimiter < 0 || startDelimiter <= offset) {
-            doc.setCharacterAttributes(offset, endDelimiter - offset + 1, comment, false);
-        }
+        doc.setCharacterAttributes(offset, endDelimiter - offset + getEndDelimiter().length(), comment, false);
     }
 
     /*
@@ -256,10 +247,8 @@ public class DefaultSyntaxColorizer extends SyntaxColorizer {
             throws BadLocationException {
         int offset = rootElement.getElement(line).getEndOffset();
 
-        //  Start/End delimiter not found, nothing to do
-
-        int startDelimiter = indexOf(content, getStartDelimiter(), offset);
-        int endDelimiter = indexOf(content, getEndDelimiter(), offset);
+        int startDelimiter = content.indexOf(getStartDelimiter(), offset);
+        int endDelimiter = content.indexOf(getEndDelimiter(), offset);
 
         if (startDelimiter < 0) {
             startDelimiter = content.length();
@@ -270,7 +259,6 @@ public class DefaultSyntaxColorizer extends SyntaxColorizer {
         }
 
         int delimiter = Math.min(startDelimiter, endDelimiter);
-
         if (delimiter < offset) {
             return;
         }
@@ -305,61 +293,74 @@ public class DefaultSyntaxColorizer extends SyntaxColorizer {
             endOffset = contentLength - 1;
         }
 
-        //  check for multi line comments
-        //  (always set the comment attribute for the entire line)
+        doc.setCharacterAttributes(startOffset, lineLength, normal, false);
 
-        if (endingMultiLineComment(content, startOffset, endOffset)
-                || isMultiLineComment()
-                || startingMultiLineComment(content, startOffset, endOffset)) {
-            doc.setCharacterAttributes(startOffset, endOffset - startOffset + 1, comment, false);
-            return;
+        //  check for multi line comments
+        int e = endOffset;
+        int s = startOffset;
+        if (isMultiLineComment()) {
+            if ((e = endingMultiLineComment(content, startOffset, endOffset)) > -1) {
+                doc.setCharacterAttributes(startOffset, e - startOffset + getEndDelimiter().length(), comment, false);
+                setMultiLineComment(false);
+                if ((s = startingMultiLineComment(content, startOffset, endOffset)) > -1 && s > e) {
+                    doc.setCharacterAttributes(s, endOffset - s + 1, comment, false);
+                    setMultiLineComment(true);
+                    return;
+                }
+                startOffset = e + getEndDelimiter().length();
+            } else {
+                doc.setCharacterAttributes(startOffset, endOffset - startOffset + 1, comment, false);
+                setMultiLineComment(true);
+                return;
+            }
+        } else if ((s = startingMultiLineComment(content, startOffset, endOffset)) > -1) {
+            if (((e = endingMultiLineComment(content, startOffset, endOffset)) > -1) && e > s) {
+                doc.setCharacterAttributes(s, e - s + getEndDelimiter().length(), comment, false);
+                setMultiLineComment(false);
+                startOffset = e + getEndDelimiter().length();
+            } else {
+                doc.setCharacterAttributes(s, endOffset - s + 1, comment, false);
+                setMultiLineComment(true);
+                return;
+            }
         }
 
-        //  set normal attributes for the line
-
-        doc.setCharacterAttributes(startOffset, lineLength, normal, true);
-
         //  check for single line comment
-
         int index = content.indexOf(getSingleLineDelimiter(), startOffset);
-
         if ((index > -1) && (index < endOffset)) {
             doc.setCharacterAttributes(index, endOffset - index + 1, comment, false);
             endOffset = index - 1;
         }
 
         //  check for tokens
-
         checkForTokens(content, startOffset, endOffset);
     }
 
     /*
      *  Does this line contain the start delimiter
      */
-    private boolean startingMultiLineComment(String content, int startOffset, int endOffset)
+    private int startingMultiLineComment(String content, int startOffset, int endOffset)
             throws BadLocationException {
-        int index = indexOf(content, getStartDelimiter(), startOffset);
+        int index = content.indexOf(getStartDelimiter(), startOffset);
 
         if ((index < 0) || (index > endOffset)) {
-            return false;
+            return -1;
         } else {
-            setMultiLineComment(true);
-            return true;
+            return index;
         }
     }
 
     /*
      *  Does this line contain the end delimiter
      */
-    private boolean endingMultiLineComment(String content, int startOffset, int endOffset)
+    private int endingMultiLineComment(String content, int startOffset, int endOffset)
             throws BadLocationException {
-        int index = indexOf(content, getEndDelimiter(), startOffset);
+        int index = content.indexOf(getEndDelimiter(), startOffset);
 
         if ((index < 0) || (index > endOffset)) {
-            return false;
+            return -1;
         } else {
-            setMultiLineComment(false);
-            return true;
+            return index;
         }
     }
 
@@ -483,52 +484,6 @@ public class DefaultSyntaxColorizer extends SyntaxColorizer {
     }
 
     /*
-     *  Assume the needle will the found at the start/end of the line
-     */
-    private int indexOf(String content, String needle, int offset) {
-        int index;
-
-        while ((index = content.indexOf(needle, offset)) != -1) {
-            String text = getLine(content, index).trim();
-
-            if (text.startsWith(needle) || text.endsWith(needle)) {
-                break;
-            } else {
-                offset = index + 1;
-            }
-        }
-
-        return index;
-    }
-
-    /*
-     *  Assume the needle will the found at the start/end of the line
-     */
-    private int lastIndexOf(String content, String needle, int offset) {
-        int index;
-
-        while ((index = content.lastIndexOf(needle, offset)) != -1) {
-            String text = getLine(content, index).trim();
-
-            if (text.startsWith(needle) || text.endsWith(needle)) {
-                break;
-            } else {
-                offset = index - 1;
-            }
-        }
-
-        return index;
-    }
-
-    private String getLine(String content, int offset) {
-        int line = rootElement.getElementIndex(offset);
-        Element lineElement = rootElement.getElement(line);
-        int start = lineElement.getStartOffset();
-        int end = lineElement.getEndOffset();
-        return content.substring(start, end - 1);
-    }
-
-    /*
      *  Override for other languages
      */
     public boolean isTokenSeparator(char character) {
@@ -564,7 +519,7 @@ public class DefaultSyntaxColorizer extends SyntaxColorizer {
     }
 
     public boolean isDigit(char c) {
-        return Character.isDigit(c);
+        return false;//Character.isDigit(c);
     }
 
     /*

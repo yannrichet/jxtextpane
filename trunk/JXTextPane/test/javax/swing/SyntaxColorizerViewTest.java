@@ -83,7 +83,6 @@ public class SyntaxColorizerViewTest {
 
         final CodeEditorPane edit = new CodeEditorPane();
         edit.setKeywordColor(syntax);
-
         JButton button = new JButton("Load ...");
         button.addActionListener(new ActionListener() {
 
@@ -108,7 +107,7 @@ public class SyntaxColorizerViewTest {
         });
 
         JFrame frame = new JFrame("Syntax Highlighting");
-        frame.getContentPane().add(new JScrollPane(edit));
+        frame.getContentPane().add(edit.getContainerWithLines());
         frame.getContentPane().add(button, BorderLayout.SOUTH);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setSize(800, 300);
