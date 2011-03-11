@@ -267,7 +267,7 @@ public class DefaultSyntaxColorizer extends SyntaxColorizer {
 
         int endLine = rootElement.getElementIndex(delimiter);
 
-        for (int i = line + 1; i < endLine; i++) {
+        for (int i = line + 1; i <= endLine; i++) {
             Element branch = rootElement.getElement(i);
             Element leaf = doc.getCharacterElement(branch.getStartOffset());
             AttributeSet as = leaf.getAttributes();
