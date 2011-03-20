@@ -203,12 +203,17 @@ public class LineNumbersTextPane extends JXTextPane {
             int startline = doc.getDefaultRootElement().getElementIndex(viewStart) + 1;
             int endline = doc.getDefaultRootElement().getElementIndex(viewEnd) + 1;
 
+            g.setFont(_editor.getFont());
             if (updateFont) {
-                g.setFont(_editor.getFont());
                 fontHeight = g.getFontMetrics(_editor.getFont()).getHeight();
                 fontDesc = g.getFontMetrics(_editor.getFont()).getDescent();
-                starting_y = fontHeight - fontDesc;
                 updateFont = false;
+            }
+            try {
+                starting_y = _editor.modelToView(viewStart).y - jScrollPane1.getViewport().getViewPosition().y + fontHeight - fontDesc;
+            } catch (BadLocationException e1) {
+                //e1.printStackTrace();
+            } catch (NullPointerException e) {
             }
 
             for (int line = startline, y = starting_y; line <= endline; y += fontHeight, line++) {
