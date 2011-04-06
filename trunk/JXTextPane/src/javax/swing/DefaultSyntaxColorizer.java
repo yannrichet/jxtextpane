@@ -496,7 +496,7 @@ public class DefaultSyntaxColorizer extends SyntaxColorizer {
     }
 
     public boolean isWhiteSpace(char character) {
-        return Character.isSpaceChar(character) || character == '\u0009';
+        return Character.isWhitespace(character);
     }
 
     public boolean isLetter(char character) {
