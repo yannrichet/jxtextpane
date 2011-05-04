@@ -14,8 +14,10 @@ import java.util.LinkedList;
 import java.util.Map;
 import javax.swing.event.CaretEvent;
 import javax.swing.event.CaretListener;
+import javax.swing.event.MenuEvent;
 import javax.swing.event.MenuKeyEvent;
 import javax.swing.event.MenuKeyListener;
+import javax.swing.event.MenuListener;
 import javax.swing.text.AbstractDocument;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.DefaultHighlighter.DefaultHighlightPainter;
@@ -34,9 +36,9 @@ public class CodeEditorPane extends LineNumbersTextPane {
 
     /** Here is a way to handle regexp on keywords.*/
     public static class RegExpKeywordMap extends HashMap {
-
+        
         public boolean keyAsRegexp = true;
-
+        
         @Override
         public boolean containsKey(Object o) {
             if (keyAsRegexp) {
@@ -55,7 +57,7 @@ public class CodeEditorPane extends LineNumbersTextPane {
                 return false;
             }
         }
-
+        
         @Override
         public Object get(Object o) {
             if (keyAsRegexp) {
@@ -94,9 +96,9 @@ public class CodeEditorPane extends LineNumbersTextPane {
     KeyAdapter keyAdapter;
     int maxCompletionMenuItems = 10;
     public static char[][] OpenCloseBrace = {{'(', ')'}, {'[', ']'}, {'{', '}'}/*, {'<', '>'}, {'\'', '\''}, {'"', '"'}*/};
-
+    
     public class CodeHighlighter implements CaretListener {
-
+        
         public void updateHighlights() {
             int nh = 0;
             if (caret_line) {
@@ -148,7 +150,7 @@ public class CodeEditorPane extends LineNumbersTextPane {
                 blockDocumentFilter.setTailHighlights(nh);
             }
         }
-
+        
         public void caretUpdate(CaretEvent e) {
             JTextComponent comp = (JTextComponent) e.getSource();
             int pos = comp.getCaretPosition();
@@ -212,28 +214,28 @@ public class CodeEditorPane extends LineNumbersTextPane {
             }
         }
     }
-
+    
     public CodeEditorPane() {
         super();
         init = true;
         setFont(Font.decode(Font.MONOSPACED + " " + DEFAULT_FONT_SIZE));
-
+        
         setTabSize(4);
-
+        
         completionMenu = new JPopupMenu() {
-
+            
             @Override
             protected void firePopupMenuCanceled() {
                 super.firePopupMenuCanceled();
                 completionMenu.setVisible(false);
             }
         };
-
+        
         completionMenu.setBackground(Color.WHITE);
         completionMenu.setFont(getFont());
-
+        
         completionMenu.addKeyListener(new KeyAdapter() {
-
+            
             @Override
             public void keyPressed(KeyEvent e) {//To handle cycling of suggestions with completion key
                 if (isCompletionKeyEvent(e)) {
@@ -280,9 +282,9 @@ public class CodeEditorPane extends LineNumbersTextPane {
                 }
             }
         });
-
+        
         keyAdapter = new KeyAdapter() {
-
+            
             void fillCompletionMenu(final LinkedList<KeyWordItem> items, final int from) {
                 if (items == null) {
                     return;
@@ -291,7 +293,7 @@ public class CodeEditorPane extends LineNumbersTextPane {
                 completionMenu.removeAll();
                 if (from > 0) {
                     completionMenu.add(new JMenuItem(new AbstractAction("...") {
-
+                        
                         public void actionPerformed(ActionEvent e) {
                             fillCompletionMenu(items, Math.max(0, from - maxCompletionMenuItems));
                         }
@@ -304,7 +306,7 @@ public class CodeEditorPane extends LineNumbersTextPane {
                 }
                 if (i < items.size()) {
                     completionMenu.add(new JMenuItem(new AbstractAction("...") {
-
+                        
                         public void actionPerformed(ActionEvent e) {
                             fillCompletionMenu(items, from + maxCompletionMenuItems);
                         }
@@ -312,7 +314,7 @@ public class CodeEditorPane extends LineNumbersTextPane {
                 }
                 completionMenu.setVisible(true);
             }
-
+            
             @Override
             public void keyPressed(KeyEvent e) {
                 super.keyPressed(e);
@@ -320,11 +322,11 @@ public class CodeEditorPane extends LineNumbersTextPane {
                     String txt = getText();
                     String before = txt.substring(0, getCaretPosition());
                     String after = txt.substring(getCaretPosition());
-
+                    
                     LinkedList<KeyWordItem> visible_completion_keywords = buildCompletionMenu(before, after);
-
+                    
                     fillCompletionMenu(visible_completion_keywords, 0);
-
+                    
                     if (visible_completion_keywords != null && visible_completion_keywords.size() > 0) {
                         try {
                             Rectangle r = modelToScrollView(getCaretPosition());
@@ -341,15 +343,15 @@ public class CodeEditorPane extends LineNumbersTextPane {
             }
         };
         addKeyListener(keyAdapter);
-
+        
         addCaretListener(new CodeHighlighter());
-
+        
         blockDocumentFilter = new BlockModeHandler(this);
         blockDocumentFilter.setTailHighlights(1);
-
+        
         braceCompleter = new BraceCompletion(this, bracesToComplete);
     }
-
+    
     @Override
     public String getSelectedText() {
         if (blockDocumentFilter != null && blockDocumentFilter.isBlockMode()) {
@@ -371,7 +373,7 @@ public class CodeEditorPane extends LineNumbersTextPane {
             char c;
             c = beforeCaret.charAt(beforeCaret.length() - i);
             while (!syntaxDocumentFilter.isTokenSeparator(c)) {
-                base.insert(0,c);
+                base.insert(0, c);
                 i++;
                 if (((getCaretPosition() - i) >= 0)) {
                     c = beforeCaret.charAt(beforeCaret.length() - i);
@@ -380,7 +382,7 @@ public class CodeEditorPane extends LineNumbersTextPane {
                 }
             }
         }
-
+        
         LinkedList<KeyWordItem> newitems = new LinkedList<KeyWordItem>();
         for (String k : help.keySet()) {
             if (k.startsWith(base.toString())) {
@@ -395,16 +397,16 @@ public class CodeEditorPane extends LineNumbersTextPane {
     boolean isCompletionKeyEvent(KeyEvent e) {
         return e.isControlDown() && e.getKeyCode() == KeyEvent.VK_SPACE;
     }
-
+    
     public class KeyWordItem extends JMenu implements Comparable {//TODO: help content may be displayed automatically when this menu is selected...
 
         String name;
         MenuElement[] path = new MenuElement[2];
         int alreadywriten;
-
-        public KeyWordItem(final String name, Map<String, String> dictionnary, JPopupMenu parent, final int alreadywriten) {
+        
+        public KeyWordItem(final String name, final Map<String, String> dictionnary, JPopupMenu parent, final int alreadywriten) {
             super(new AbstractAction(name) {
-
+                
                 public void actionPerformed(ActionEvent e) {
                     if (isEditable()) {
                         try {
@@ -420,13 +422,11 @@ public class CodeEditorPane extends LineNumbersTextPane {
             this.alreadywriten = alreadywriten;
             setText(name);
             setFont(completionMenu.getFont());
-
-            createHelpMenu(name, dictionnary);
-
+            
             path[0] = parent;
             path[1] = this;
             this.addMenuKeyListener(new MenuKeyListener() {
-
+                
                 public void menuKeyTyped(MenuKeyEvent e) {
                     MenuElement[] path = MenuSelectionManager.defaultManager().getSelectedPath();
                     KeyWordItem item = (KeyWordItem) path[1];
@@ -435,38 +435,49 @@ public class CodeEditorPane extends LineNumbersTextPane {
                         getAction().actionPerformed(null);
                     }
                 }
-
+                
                 public void menuKeyPressed(MenuKeyEvent e) {
                 }
-
+                
                 public void menuKeyReleased(MenuKeyEvent e) {
                 }
             });
-
+            this.addMenuListener(new MenuListener() {
+                
+                public void menuSelected(MenuEvent e) {
+                    createHelpMenu(name, dictionnary);
+                }
+                
+                public void menuDeselected(MenuEvent e) {
+                }
+                
+                public void menuCanceled(MenuEvent e) {
+                }
+            });
         }
-
+        
         protected void createHelpMenu(String name, Map<String, String> dictionnary) {
-            if (dictionnary != null && name != null) {
+            if (dictionnary != null && name != null && dictionnary.containsKey(name)) {
                 if (dictionnary.get(name) != null && dictionnary.get(name).length() > 0) {
                     add(buildHelpMenu(dictionnary.get(name)));
                 }
             }
         }
-
+        
         @Override
         public String toString() {
             return "[" + name.substring(0, alreadywriten) + "]" + name.substring(alreadywriten) + "\n" + super.toString();
         }
-
+        
         public int compareTo(Object o) {
             return name.compareTo(((KeyWordItem) o).name);
         }
     }
-
+    
     public JComponent buildHelpMenu(String help) {
         return new JMenuItem(help);
     }
-
+    
     public void setVerticalLineAtPos(int pos) {
         this.vertical_line = pos;
     }
@@ -483,7 +494,7 @@ public class CodeEditorPane extends LineNumbersTextPane {
      */
     public void setCaretLine(boolean caret_line) {
         this.caret_line = caret_line;
-
+        
     }
 
     /**
@@ -501,17 +512,17 @@ public class CodeEditorPane extends LineNumbersTextPane {
     }
     public Highlighter.HighlightPainter painter_width = new ComponentWidthHighlightPainter(caret_line_color);
     public Object highlight_width;
-
+    
     public class ComponentWidthHighlightPainter extends LayeredHighlighter.LayerPainter {
-
+        
         public ComponentWidthHighlightPainter(Color c) {
             color = c;
         }
-
+        
         public void paint(Graphics g, int offs0, int offs1, Shape bounds, JTextComponent c) {
             // Do nothing: this method will never be called
         }
-
+        
         public Shape paintLayer(Graphics g, int offs0, int offs1, Shape bounds, JTextComponent c, View view) {
             g.setColor(color);
             Rectangle alloc = null;
@@ -550,17 +561,17 @@ public class CodeEditorPane extends LineNumbersTextPane {
     public SyntaxColorizer syntaxDocumentFilter;
     public BraceCompletion braceCompleter;
     public char[][] bracesToComplete = BraceCompletion.DEFAULT_BRACES;
-
+    
     public void setBracesToComplete(char[][] bracesToComplete) {
         this.bracesToComplete = bracesToComplete;
         braceCompleter = new BraceCompletion(this, bracesToComplete);
         updateDocumentFilter();
     }
-
+    
     protected SyntaxColorizer buildSyntaxColorizer(HashMap<String, Color> keywords) {
         return new DefaultSyntaxColorizer(this, keywords);
     }
-
+    
     public void setKeywordColor(HashMap<String, Color> keywords) {
         if (keywords == null) {
             syntaxDocumentFilter = null;
@@ -569,15 +580,15 @@ public class CodeEditorPane extends LineNumbersTextPane {
         }
         updateDocumentFilter();
     }
-
+    
     protected void updateDocumentFilter() {
         ((AbstractDocument) this.getDocument()).setDocumentFilter(new DocumentFilterChain(braceCompleter, syntaxDocumentFilter, blockDocumentFilter));
     }
-
+    
     public void setKeywordHelp(HashMap<String, String> keywords) {
         help = keywords;
     }
-
+    
     @Override
     protected EditorKit createDefaultEditorKit() {
         return new LineWrapEditorKit();
@@ -587,7 +598,7 @@ public class CodeEditorPane extends LineNumbersTextPane {
     protected String font_width_ex = "a";
     protected boolean reset_font_width = true;
     protected boolean reset_font_height = true;
-
+    
     @Override
     public void setFont(Font font) {
         if (font == null || font.getFamily() == null) {
