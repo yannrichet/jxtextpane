@@ -516,11 +516,12 @@ public class DefaultSyntaxColorizer extends SyntaxColorizer {
     }
 
     public boolean isOperator(char character) {
-        if (getOperands().indexOf(character) >= 0) {
-            return true;
-        } else {
-            return false;
+        for (int i = 0; i < getOperands().length(); i++) {
+            if (character == getOperands().charAt(i)) {
+                return true;
+            }
         }
+        return false;
     }
 
     public boolean isDigit(char c) {
@@ -530,20 +531,13 @@ public class DefaultSyntaxColorizer extends SyntaxColorizer {
     /*
      *  Override for other languages
      */
-    public boolean isQuoteDelimiter(String character) {
-        if (getQuotes().indexOf(character) < 0) {
-            return false;
-        } else {
-            return true;
-        }
-    }
-
     public boolean isQuoteDelimiter(char character) {
-        if (getQuotes().indexOf(character) < 0) {
-            return false;
-        } else {
-            return true;
+        for (int i = 0; i < getQuotes().length(); i++) {
+            if (character == getQuotes().charAt(i)) {
+                return true;
+            }
         }
+        return false;
     }
 
     /*
