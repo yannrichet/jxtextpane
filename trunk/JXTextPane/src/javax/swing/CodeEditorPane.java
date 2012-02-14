@@ -604,8 +604,8 @@ public class CodeEditorPane extends LineNumbersTextPane {
         if (font == null || font.getFamily() == null) {
             return;
         }
-        if (init && !font.getFamily().equals(Font.MONOSPACED)) {
-            throw new IllegalArgumentException("Only " + Font.getFont(Font.MONOSPACED).getName() + " is authorized in such component.");
+        if (init && !font.getFamily().contains("Mono")) {
+            throw new IllegalArgumentException("Only monospaced font is authorized in such component.");
         } else {
             super.setFont(font);
             reset_font_width = true;
