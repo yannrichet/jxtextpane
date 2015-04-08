@@ -36,7 +36,6 @@ import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
 import javax.swing.undo.UndoManager;
 import org.jdesktop.swingx.JXEditorPane;
-import org.jdesktop.swingx.UIAction;
 import org.jdesktop.swingx.action.ActionManager;
 
 /**
@@ -45,12 +44,12 @@ import org.jdesktop.swingx.action.ActionManager;
  * @author richet (heavily inspired by swingX code)
  */
 public class JXTextPane extends JXEditorPane {
-
+    
     private final static String ACTION_UNDO = "undo";
     private final static String ACTION_REDO = "redo";
     private UndoableEditListener doHandler;
     private UndoManager doManager;
-
+    
     public JXTextPane() {
         super();
 
@@ -59,15 +58,19 @@ public class JXTextPane extends JXEditorPane {
         getDocument().addUndoableEditListener(getUndoableEditListener());
 
         //from JXEditorPane
-        getActionMap().put(ACTION_UNDO, new DoActions(ACTION_UNDO));
-        getActionMap().put(ACTION_REDO, new DoActions(ACTION_REDO));
-
+        try {
+            getActionMap().put(ACTION_UNDO, new DoActions(ACTION_UNDO));
+            getActionMap().put(ACTION_REDO, new DoActions(ACTION_REDO));
+        } catch (Exception e) {
+            System.err.println("Could not support actions unod/redo");
+        }
+        
         getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(KeyEvent.VK_Z, InputEvent.CTRL_MASK), ACTION_UNDO);
         getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(KeyEvent.VK_Y, InputEvent.CTRL_MASK), ACTION_REDO);
-
+        
         putClientProperty(JEditorPane.HONOR_DISPLAY_PROPERTIES, Boolean.TRUE);
     }
-
+    
     @Override
     protected EditorKit createDefaultEditorKit() {
         return new StyledEditorKit();
@@ -94,7 +97,7 @@ public class JXTextPane extends JXEditorPane {
                     EventQueue.getMostRecentEventTime(), modifiers));
         }
     }
-
+    
     @Override
     public void setText(String t) {
         //getDocument().removeUndoableEditListener(getUndoableEditListener());// pour debrayer lengthregistre undo/redo
@@ -105,7 +108,7 @@ public class JXTextPane extends JXEditorPane {
 
     //from JXEditorPane
     private class PropertyHandler implements PropertyChangeListener {
-
+        
         public void propertyChange(PropertyChangeEvent evt) {
             String name = evt.getPropertyName();
             if (name.equals("document")) {
@@ -113,7 +116,7 @@ public class JXTextPane extends JXEditorPane {
                 if (doc != null) {
                     doc.removeUndoableEditListener(getUndoableEditListener());
                 }
-
+                
                 doc = (Document) evt.getNewValue();
                 if (doc != null) {
                     doc.addUndoableEditListener(getUndoableEditListener());
@@ -133,7 +136,7 @@ public class JXTextPane extends JXEditorPane {
         this();
         setStyledDocument(doc);
     }
-
+    
     public void setTabSize(int size) {
         FontMetrics fm = this.getFontMetrics(this.getFont());
         int charWidth = fm.charWidth(' ');
@@ -145,12 +148,12 @@ public class JXTextPane extends JXEditorPane {
             int tab = j + 1;
             tabs[j] = new TabStop(tab * tabWidth);
         }
-
+        
         TabSet tabSet = new TabSet(tabs);
         SimpleAttributeSet attributes = new SimpleAttributeSet();
         StyleConstants.setTabSet(attributes, tabSet);
         int length = this.getDocument().getLength();
-
+        
         try {
             this.getStyledDocument().setParagraphAttributes(0, length, attributes, false);
         } catch (Exception e) {
@@ -168,7 +171,7 @@ public class JXTextPane extends JXEditorPane {
 
     //from JXEditorPane
     private class UndoHandler implements UndoableEditListener {
-
+        
         public void undoableEditHappened(UndoableEditEvent evt) {
             doManager.addEdit(evt.getEdit());
             updateActionState();
@@ -191,7 +194,7 @@ public class JXTextPane extends JXEditorPane {
         // really cares about enabled as it should. 
         //
         Runnable doEnabled = new Runnable() {
-
+            
             public void run() {
                 ActionManager manager = ActionManager.getInstance();
                 manager.setEnabled(ACTION_UNDO, doManager.canUndo());
@@ -208,12 +211,14 @@ public class JXTextPane extends JXEditorPane {
      * JW: these if-constructs are totally crazy ... we live in OO world!
      * 
      */
-    private class DoActions extends UIAction {
-
+    private class DoActions extends AbstractAction {
+        
         DoActions(String name) {
-            super(name);
+            super();
+            setName(name);
         }
-
+        
+        @Override
         public void actionPerformed(ActionEvent evt) {
             String name = getName();
             if (ACTION_UNDO.equals(name)) {
@@ -233,11 +238,11 @@ public class JXTextPane extends JXEditorPane {
             } else {
                 System.out.println("ActionHandled: " + name);
             }
-
+            
         }
-
+        
         @Override
-        public boolean isEnabled(Object sender) {
+        public boolean isEnabled() {
             String name = getName();
             if (ACTION_UNDO.equals(name)) {
                 return isEditable() && doManager.canUndo();
@@ -307,7 +312,7 @@ public class JXTextPane extends JXEditorPane {
     public void replaceSelection(String content) {
         replaceSelection(content, true);
     }
-
+    
     private void replaceSelection(String content, boolean checkEditable) {
         if (checkEditable && !isEditable()) {
             UIManager.getLookAndFeel().provideErrorFeedback(JXTextPane.this);
@@ -334,7 +339,7 @@ public class JXTextPane extends JXEditorPane {
                 if (composedTextSaved) {
                     restoreComposedText2(this);
                 }
-
+                
             } catch (BadLocationException e) {
                 UIManager.getLookAndFeel().provideErrorFeedback(JXTextPane.this);
             }
@@ -342,11 +347,11 @@ public class JXTextPane extends JXEditorPane {
     }
     private final String[] composedTextMethodNames = {"saveComposedText", "restoreComposedText"};
     private final Method[] composedTextMethods = new Method[2];
-
+    
     private Object invokeComposedTextMethod(final JTextComponent c,
                                             final int index, final Class[] argTypes, final Object[] args) {
         return AccessController.doPrivileged(new PrivilegedAction() {
-
+            
             @Override
             public Object run() {
                 try {
@@ -364,12 +369,12 @@ public class JXTextPane extends JXEditorPane {
             }
         });
     }
-
+    
     boolean saveComposedText2(JTextComponent c, int pos) {
         return (Boolean) invokeComposedTextMethod(
                 c, 0, new Class[]{Integer.TYPE}, new Object[]{pos});
     }
-
+    
     void restoreComposedText2(JTextComponent c) {
         invokeComposedTextMethod(c, 1, new Class[0], new Object[0]);
     }
