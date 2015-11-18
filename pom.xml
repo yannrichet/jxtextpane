@@ -9,7 +9,7 @@
 	<!-- Maven coordinates -->
 	<groupId>org.irsn</groupId>
 	<artifactId>org-irsn-jxtextpane</artifactId>
-	<version>1.0.1-SNAPSHOT</version>
+	<version>1.0.2</version>
 
 
 	<!-- POM inheritence -->
@@ -52,12 +52,12 @@
 	<inceptionYear>2015</inceptionYear>
 
 	<!-- Project licenses -->
-	<licenses>
-		<license>
-			<name>TODO</name>
-			<url>TODO</url>
-		</license>
-	</licenses>
+	<!-- <licenses> -->
+	<!-- <license> -->
+	<!-- <name>TODO</name> -->
+	<!-- <url>TODO</url> -->
+	<!-- </license> -->
+	<!-- </licenses> -->
 
 	<!-- Development team -->
 	<developers></developers>
