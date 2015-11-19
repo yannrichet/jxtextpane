@@ -9,7 +9,7 @@
 	<!-- Maven coordinates -->
 	<groupId>org.irsn</groupId>
 	<artifactId>org-irsn-jxtextpane</artifactId>
-	<version>1.0.2</version>
+	<version>1.0.4</version>
 
 	<!-- Dependencies -->
 	<dependencies>
