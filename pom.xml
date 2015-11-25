@@ -1,73 +1,43 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<parent>
+		<groupId>org.sonatype.oss</groupId>
+		<artifactId>oss-parent</artifactId>
+		<version>9</version>
+	</parent>
+
 	<modelVersion>4.0.0</modelVersion>
 
-	<!-- =========================================================== -->
-	<!-- POM relationships -->
-	<!-- =========================================================== -->
+	<groupId>com.github.yannrichet</groupId>
+	<artifactId>JXTextPane</artifactId>
+	<version>1.0.5</version>
+	<packaging>jar</packaging>
+	<name>jxtextpane</name>
 
-	<!-- Maven coordinates -->
-	<groupId>org.irsn</groupId>
-	<artifactId>org-irsn-jxtextpane</artifactId>
-	<version>1.0.4</version>
+	<url>https://github.com/yannrichet/jxtextpane</url>
 
-	<!-- Dependencies -->
+	<properties>
+	</properties>
+
 	<dependencies>
 		<dependency>
 			<groupId>org.swinglabs</groupId>
 			<artifactId>swingx-core</artifactId>
 			<version>1.6.2-2</version>
 		</dependency>
-		<dependency>
-			<groupId>com.github.yannrichet</groupId>
-			<artifactId>JMathArray</artifactId>
-			<version>1.0</version>
-		</dependency>
-		<dependency>
-			<groupId>com.github.yannrichet</groupId>
-			<artifactId>JMathPlot</artifactId>
-			<version>1.0.1</version>
-		</dependency>
 	</dependencies>
 
-	<!-- =========================================================== -->
-	<!-- General project information -->
-	<!-- =========================================================== -->
-
-	<!-- General project information -->
-	<name>JX Text Pane</name>
-	<description>JX Text Pane</description>
-
-	<organization>
-		<name>IRSN</name>
-		<url>http://www.irsn.fr</url>
-	</organization>
-	<inceptionYear>2015</inceptionYear>
-
-	<!-- Project licenses -->
-	<!-- <licenses>
-		<license>
-			<name>TODO</name>
-			<url>TODO</url>
-		</license>
-	</licenses> -->
-
-	<!-- Development team -->
-	<developers></developers>
-
-	<!-- External contributors -->
-	<contributors></contributors>
-
-	<!-- =========================================================== -->
-	<!-- Build settings -->
-	<!-- =========================================================== -->
-
-	<!-- Packaging -->
-	<packaging>bundle</packaging>
-
-	<!-- Build -->
+	<repositories>
+		<repository>
+			<id>sonatype-oss-releases</id>
+			<url>https://oss.sonatype.org/content/repositories/releases</url>
+		</repository>
+	</repositories>
+	
+    <packaging>bundle</packaging>
+		
 	<build>
-		<pluginManagement>
+	    <pluginManagement>
 			<plugins>
 				<plugin>
 					<groupId>org.apache.felix</groupId>
@@ -97,8 +67,7 @@
 			</plugins>
 		</pluginManagement>
 		<plugins>
-			<!-- Force the use of Java6 -->
-			<plugin>
+		    <plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
 				<version>2.3.2</version>
@@ -126,11 +95,91 @@
 					</instructions>
 				</configuration>
 			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-jar-plugin</artifactId>
+				<version>2.5</version>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-install-plugin</artifactId>
+				<version>2.5.2</version>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-release-plugin</artifactId>
+				<version>2.4.2</version>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-source-plugin</artifactId>
+				<version>2.2.1</version>
+				<executions>
+					<execution>
+						<id>attach-sources</id>
+						<goals>
+							<goal>jar-no-fork</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-javadoc-plugin</artifactId>
+				<version>2.9.1</version>
+				<executions>
+					<execution>
+						<id>attach-javadocs</id>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-gpg-plugin</artifactId>
+				<version>1.5</version>
+				<executions>
+					<execution>
+						<id>sign-artifacts</id>
+						<phase>verify</phase>
+						<goals>
+							<goal>sign</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.sonatype.plugins</groupId>
+				<artifactId>nexus-staging-maven-plugin</artifactId>
+				<version>1.6.3</version>
+				<extensions>true</extensions>
+				<configuration>
+					<serverId>ossrh</serverId>
+					<nexusUrl>https://oss.sonatype.org/</nexusUrl>
+					<autoReleaseAfterClose>true</autoReleaseAfterClose>
+				</configuration>
+			</plugin>
 		</plugins>
+		<finalName>jxtextpane</finalName>
 	</build>
 
-	<!-- Maven version prerequisite -->
-	<prerequisites>
-		<maven>2.0.6</maven>
-	</prerequisites>
+	<scm>
+		<connection>scm:git:git@github.com:yannrichet/jxtextpane.git</connection>
+		<developerConnection>scm:git:git@github.com:yannrichet/jxtextpane.git</developerConnection>
+		<url>git@github.com:yannrichet/jxtextpane.git</url>
+	</scm>
+
+	<distributionManagement>
+		<snapshotRepository>
+			<id>ossrh</id>
+			<url>https://oss.sonatype.org/content/repositories/snapshots</url>
+		</snapshotRepository>
+		<repository>
+			<id>ossrh</id>
+			<url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+		</repository>
+	</distributionManagement>
+	
 </project>
