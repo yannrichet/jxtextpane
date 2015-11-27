@@ -11,13 +11,8 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.Calendar;
 import java.util.HashMap;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import org.irsn.javax.swing.CodeEditorPane;
-import org.math.array.DoubleArray;
-import org.math.plot.FrameView;
-import org.math.plot.Plot2DPanel;
 
 /**
  *
@@ -110,11 +105,11 @@ public class DefaultSyntaxColorizerPerfTest {
         frame.setSize(800, 800);
         frame.setVisible(true);
 
-        tictocplot = new Plot2DPanel();
-        new FrameView(tictocplot);
+        //tictocplot = new Plot2DPanel();
+        //new FrameView(tictocplot);
     }
     static double tic;
-    Plot2DPanel tictocplot;
+    //Plot2DPanel tictocplot;
 
     static String repeat(String s, int n) {
         StringBuilder sb = new StringBuilder(n * s.length());
@@ -131,13 +126,13 @@ public class DefaultSyntaxColorizerPerfTest {
         for (int i = 1; i <= 33; i++) {
             String content = repeat(unit_content, i);
             double[] s = test10TicTocs(content);
-            tictocplot.addScatterPlot("", DoubleArray.buildXY(unit * i, unit * i, s));
+            //tictocplot.addScatterPlot("", DoubleArray.buildXY(unit * i, unit * i, s));
         }
-        try {
+        /*try {
             tictocplot.toGraphicFile(new File("DefaultSyntaxColorizerPerfTest.png"));
         } catch (IOException ex) {
             ex.printStackTrace();
-        }
+        }*/
     }
 
     public double[] test10TicTocs(String content) {
