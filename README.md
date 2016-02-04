@@ -63,3 +63,5 @@ public class Example {
     }
 }
 ```
+
+![Analytics](https://ga-beacon.appspot.com/UA-109580-20/jxtextpane)
