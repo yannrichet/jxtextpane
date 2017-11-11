@@ -1,4 +1,6 @@
-#JXTextPane: Integration of several features lacking in JTextPane for code edition purpose.#
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.github.yannrichet/JXTextPane/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.github.yannrichet/JXTextPane)
+
+# JXTextPane: Integration of several features lacking in JTextPane for code edition purpose.
 
 All classes implemented are highly inspired from web search results. The main value added of this project is to integrate all of these search results in one consistent API.
 
